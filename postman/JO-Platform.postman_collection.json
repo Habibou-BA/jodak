@@ -440,6 +440,24 @@
           }
         }
       ]
+    },
+    {
+      "name": "Tableau des médailles",
+      "item": [
+        {
+          "name": "Tableau officiel des médailles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tableau-medailles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tableau-medailles"]
+            },
+            "description": "Classement des nations : or, puis argent, puis bronze (départage alphabétique)."
+          }
+        }
+      ]
     }
   ]
 }
