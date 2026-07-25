@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jodak.dtos.discipline.DisciplineRequest;
 import com.jodak.dtos.discipline.DisciplineResponse;
 import com.jodak.exceptions.ResourceNotFoundException;
+import com.jodak.services.interfaces.AthleteService;
 import com.jodak.services.interfaces.DisciplineService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class DisciplineControllerTest {
 
     @MockBean
     private DisciplineService service;
+
+    @MockBean
+    private AthleteService athleteService;
 
     @Test
     @DisplayName("POST valide renvoie 201 avec l'en-tête Location")
