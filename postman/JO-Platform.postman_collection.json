@@ -458,6 +458,36 @@
           }
         }
       ]
+    },
+    {
+      "name": "Tableau de bord",
+      "item": [
+        {
+          "name": "Synthèse statistique",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tableau-de-bord",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tableau-de-bord"]
+            },
+            "description": "Compteurs globaux + classement par points (Or=7, Argent=4, Bronze=1)."
+          }
+        },
+        {
+          "name": "Classement par points",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tableau-de-bord/classement-points",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tableau-de-bord", "classement-points"]
+            }
+          }
+        }
+      ]
     }
   ]
 }
