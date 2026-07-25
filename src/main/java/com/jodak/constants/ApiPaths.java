@@ -15,4 +15,5 @@ public final class ApiPaths {
     public static final String EPREUVES = API_V1 + "/epreuves";
     public static final String RESULTATS = API_V1 + "/resultats";
     public static final String MEDAL_TABLE = API_V1 + "/tableau-medailles";
+    public static final String DASHBOARD = API_V1 + "/tableau-de-bord";
 }

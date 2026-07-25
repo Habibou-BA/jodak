@@ -1,6 +1,7 @@
 package com.jodak.repositories;
 
 import com.jodak.entities.Resultat;
+import com.jodak.enums.Medal;
 import com.jodak.repositories.projections.CountryMedalCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -41,4 +42,7 @@ public interface ResultatRepository
             group by c.id, c.code, c.name
             """)
     List<CountryMedalCount> aggregateMedalsByCountry();
+
+    /** Nombre total de médailles d'un type donné (or, argent ou bronze). */
+    long countByMedal(Medal medal);
 }
