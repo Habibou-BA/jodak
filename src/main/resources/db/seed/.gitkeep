@@ -1,0 +1,2 @@
+# Jeu de données de démonstration, chargé UNIQUEMENT en profil dev (voir application-dev.yml).
+# Ne jamais référencer cet emplacement en test ou en production.

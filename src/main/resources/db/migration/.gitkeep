@@ -1,0 +1,2 @@
+# Emplacement des migrations Flyway versionnées (V1__..., V2__...).
+# Les migrations seront ajoutées au fil de la Phase 6, une par entité.

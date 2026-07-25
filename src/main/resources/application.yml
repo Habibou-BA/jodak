@@ -1,0 +1,32 @@
+# Configuration commune (tous profils). Le profil actif par défaut est "dev".
+spring:
+  application:
+    name: olympics-platform
+  profiles:
+    default: dev
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate        # Hibernate valide le schéma Flyway, ne le modifie jamais
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  mvc:
+    problemdetails:
+      enabled: true             # erreurs au format ProblemDetail (RFC 7807)
+
+server:
+  port: 8080
+  error:
+    include-message: never
+    include-stacktrace: never
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
