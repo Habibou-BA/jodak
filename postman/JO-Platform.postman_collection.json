@@ -488,6 +488,56 @@
           }
         }
       ]
+    },
+    {
+      "name": "SOAP",
+      "item": [
+        {
+          "name": "WSDL",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ws/olympics.wsdl",
+              "host": ["{{baseUrl}}"],
+              "path": ["ws", "olympics.wsdl"]
+            },
+            "description": "Contrat WSDL généré à partir du XSD."
+          }
+        },
+        {
+          "name": "GetMedalTable (SOAP)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "text/xml" }],
+            "url": {
+              "raw": "{{baseUrl}}/ws",
+              "host": ["{{baseUrl}}"],
+              "path": ["ws"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ol=\"http://jodak.com/olympics/soap\">\n  <soapenv:Body>\n    <ol:GetMedalTableRequest/>\n  </soapenv:Body>\n</soapenv:Envelope>"
+            }
+          }
+        },
+        {
+          "name": "GetAthlete (SOAP)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "text/xml" }],
+            "url": {
+              "raw": "{{baseUrl}}/ws",
+              "host": ["{{baseUrl}}"],
+              "path": ["ws"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ol=\"http://jodak.com/olympics/soap\">\n  <soapenv:Body>\n    <ol:GetAthleteRequest>\n      <ol:id>1</ol:id>\n    </ol:GetAthleteRequest>\n  </soapenv:Body>\n</soapenv:Envelope>"
+            }
+          }
+        }
+      ]
     }
   ]
 }

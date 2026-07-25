@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://jodak.com/olympics/soap"
+           targetNamespace="http://jodak.com/olympics/soap"
+           elementFormDefault="qualified">
+
+    <!-- ================= Consultation d'un athlète ================= -->
+    <xs:element name="GetAthleteRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="id" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetAthleteResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="athlete" type="tns:Athlete"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="Athlete">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:element name="lastName" type="xs:string"/>
+            <xs:element name="firstName" type="xs:string"/>
+            <xs:element name="gender" type="xs:string"/>
+            <xs:element name="birthDate" type="xs:string"/>
+            <xs:element name="nationalityCode" type="xs:string"/>
+            <xs:element name="nationalityName" type="xs:string"/>
+            <xs:element name="discipline" type="xs:string"/>
+            <xs:element name="heightCm" type="xs:int"/>
+            <xs:element name="weightKg" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ================= Tableau des médailles ================= -->
+    <xs:element name="GetMedalTableRequest">
+        <xs:complexType/>
+    </xs:element>
+
+    <xs:element name="GetMedalTableResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="row" type="tns:MedalTableRow" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="MedalTableRow">
+        <xs:sequence>
+            <xs:element name="rank" type="xs:int"/>
+            <xs:element name="countryCode" type="xs:string"/>
+            <xs:element name="countryName" type="xs:string"/>
+            <xs:element name="gold" type="xs:long"/>
+            <xs:element name="silver" type="xs:long"/>
+            <xs:element name="bronze" type="xs:long"/>
+            <xs:element name="total" type="xs:long"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>
