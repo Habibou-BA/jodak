@@ -5,7 +5,9 @@ import com.jodak.dtos.common.PageResponse;
 import com.jodak.dtos.epreuve.EpreuveRequest;
 import com.jodak.dtos.epreuve.EpreuveResponse;
 import com.jodak.dtos.epreuve.EpreuveSearchCriteria;
+import com.jodak.dtos.resultat.PodiumResponse;
 import com.jodak.services.interfaces.EpreuveService;
+import com.jodak.services.interfaces.ResultatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -40,6 +42,7 @@ import java.net.URI;
 public class EpreuveController {
 
     private final EpreuveService service;
+    private final ResultatService resultatService;
 
     @PostMapping
     @Operation(summary = "Créer une épreuve")
@@ -98,5 +101,15 @@ public class EpreuveController {
     })
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @GetMapping("/{id}/podium")
+    @Operation(summary = "Consulter le podium d'une épreuve")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Podium de l'épreuve"),
+            @ApiResponse(responseCode = "404", description = "Épreuve introuvable")
+    })
+    public PodiumResponse getPodium(@PathVariable Long id) {
+        return resultatService.getPodium(id);
     }
 }
