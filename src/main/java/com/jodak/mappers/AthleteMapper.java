@@ -3,6 +3,7 @@ package com.jodak.mappers;
 import com.jodak.dtos.athlete.AthletePatchRequest;
 import com.jodak.dtos.athlete.AthleteRequest;
 import com.jodak.dtos.athlete.AthleteResponse;
+import com.jodak.dtos.athlete.AthleteSummary;
 import com.jodak.entities.Athlete;
 import com.jodak.entities.Country;
 import com.jodak.entities.Discipline;
@@ -92,5 +93,9 @@ public class AthleteMapper {
                 entity.getWeightKg(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
+    }
+
+    public AthleteSummary toSummary(Athlete entity) {
+        return new AthleteSummary(entity.getId(), entity.getLastName(), entity.getFirstName());
     }
 }

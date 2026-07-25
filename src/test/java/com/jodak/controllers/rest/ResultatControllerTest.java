@@ -1,9 +1,9 @@
 package com.jodak.controllers.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jodak.dtos.epreuve.EpreuveRequest;
-import com.jodak.dtos.epreuve.EpreuveResponse;
-import com.jodak.services.interfaces.EpreuveService;
+import com.jodak.dtos.resultat.ResultatRequest;
+import com.jodak.dtos.resultat.ResultatResponse;
+import com.jodak.enums.Medal;
 import com.jodak.services.interfaces.ResultatService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,8 +13,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -22,8 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(EpreuveController.class)
-class EpreuveControllerTest {
+@WebMvcTest(ResultatController.class)
+class ResultatControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,34 +30,29 @@ class EpreuveControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private EpreuveService service;
-
-    @MockBean
-    private ResultatService resultatService;
+    private ResultatService service;
 
     @Test
-    @DisplayName("POST valide renvoie 201 avec l'en-tête Location")
+    @DisplayName("POST valide renvoie 201 avec l'en-tête Location et la médaille")
     void createReturns201() throws Exception {
-        when(service.create(any())).thenReturn(new EpreuveResponse(
-                4L, "100 m", null, LocalDate.of(2024, 8, 4), null, null));
+        when(service.create(any())).thenReturn(new ResultatResponse(
+                6L, null, null, 1, Medal.OR, null, null));
 
-        mockMvc.perform(post("/api/v1/epreuves")
+        mockMvc.perform(post("/api/v1/resultats")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                new EpreuveRequest("100 m", 1L, LocalDate.of(2024, 8, 4)))))
+                        .content(objectMapper.writeValueAsString(new ResultatRequest(1L, 1L, 1))))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/v1/epreuves/4")))
-                .andExpect(jsonPath("$.label").value("100 m"));
+                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/v1/resultats/6")))
+                .andExpect(jsonPath("$.medal").value("OR"));
     }
 
     @Test
-    @DisplayName("POST sans libellé renvoie 400 avec le détail")
-    void createBlankLabelReturns400() throws Exception {
-        mockMvc.perform(post("/api/v1/epreuves")
+    @DisplayName("POST sans rang renvoie 400 avec le détail")
+    void createMissingRankReturns400() throws Exception {
+        mockMvc.perform(post("/api/v1/resultats")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                new EpreuveRequest("  ", 1L, LocalDate.of(2024, 8, 4)))))
+                        .content(objectMapper.writeValueAsString(new ResultatRequest(1L, 1L, null))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.label").exists());
+                .andExpect(jsonPath("$.errors.rank").exists());
     }
 }

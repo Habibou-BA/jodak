@@ -3,6 +3,7 @@ package com.jodak;
 import com.jodak.repositories.AthleteRepository;
 import com.jodak.repositories.DisciplineRepository;
 import com.jodak.repositories.EpreuveRepository;
+import com.jodak.repositories.ResultatRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +40,8 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Autowired
+    protected ResultatRepository resultatRepository;
+    @Autowired
     protected AthleteRepository athleteRepository;
     @Autowired
     protected EpreuveRepository epreuveRepository;
@@ -47,6 +50,7 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeEach
     void resetDatabase() {
+        resultatRepository.deleteAll();
         athleteRepository.deleteAll();
         epreuveRepository.deleteAll();
         disciplineRepository.deleteAll();

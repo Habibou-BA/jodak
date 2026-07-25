@@ -2,6 +2,7 @@ package com.jodak.mappers;
 
 import com.jodak.dtos.epreuve.EpreuveRequest;
 import com.jodak.dtos.epreuve.EpreuveResponse;
+import com.jodak.dtos.epreuve.EpreuveSummary;
 import com.jodak.entities.Discipline;
 import com.jodak.entities.Epreuve;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,9 @@ public class EpreuveMapper {
                 entity.getEventDate(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
+    }
+
+    public EpreuveSummary toSummary(Epreuve entity) {
+        return new EpreuveSummary(entity.getId(), entity.getLabel());
     }
 }
