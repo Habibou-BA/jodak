@@ -1,5 +1,10 @@
 package com.jodak;
 
+import com.jodak.repositories.AthleteRepository;
+import com.jodak.repositories.DisciplineRepository;
+import com.jodak.repositories.EpreuveRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -11,9 +16,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * migrations Flyway. Nécessite un démon Docker disponible ; lancé par {@code mvn verify}.
  *
  * <p>Le conteneur est un <b>singleton</b> démarré une seule fois pour toute la JVM de test et
- * partagé par toutes les classes d'intégration (via {@link DynamicPropertySource}). On évite ainsi
- * qu'un cycle de vie par classe n'arrête le conteneur entre deux classes réutilisant le même
- * contexte Spring mis en cache.</p>
+ * partagé par toutes les classes d'intégration (via {@link DynamicPropertySource}).</p>
+ *
+ * <p>Avant chaque test, les tables transactionnelles sont vidées dans l'ordre des clés étrangères.
+ * Le référentiel des nations (données de référence Flyway) est conservé.</p>
  */
 @ActiveProfiles("test")
 @SpringBootTest
@@ -30,5 +36,19 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
+    }
+
+    @Autowired
+    protected AthleteRepository athleteRepository;
+    @Autowired
+    protected EpreuveRepository epreuveRepository;
+    @Autowired
+    protected DisciplineRepository disciplineRepository;
+
+    @BeforeEach
+    void resetDatabase() {
+        athleteRepository.deleteAll();
+        epreuveRepository.deleteAll();
+        disciplineRepository.deleteAll();
     }
 }

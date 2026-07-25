@@ -3,9 +3,6 @@ package com.jodak.controllers.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jodak.AbstractIntegrationTest;
 import com.jodak.dtos.discipline.DisciplineRequest;
-import com.jodak.repositories.AthleteRepository;
-import com.jodak.repositories.DisciplineRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,18 +30,6 @@ class DisciplineIT extends AbstractIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private DisciplineRepository repository;
-
-    @Autowired
-    private AthleteRepository athleteRepository;
-
-    @BeforeEach
-    void cleanUp() {
-        athleteRepository.deleteAll(); // dépendance FK : athlètes avant disciplines
-        repository.deleteAll();
-    }
-
     @Test
     @DisplayName("POST persiste la discipline avec ses champs d'audit puis GET la restitue")
     void createPersistsAndAuditFieldsAreSet() throws Exception {
@@ -58,7 +43,7 @@ class DisciplineIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.updatedAt").exists())
                 .andReturn().getResponse().getHeader("Location");
 
-        assertThat(repository.count()).isEqualTo(1);
+        assertThat(disciplineRepository.count()).isEqualTo(1);
 
         mockMvc.perform(get(location))
                 .andExpect(status().isOk())
