@@ -6,9 +6,7 @@ import com.jodak.dtos.athlete.AthleteRequest;
 import com.jodak.entities.Country;
 import com.jodak.entities.Discipline;
 import com.jodak.enums.Gender;
-import com.jodak.repositories.AthleteRepository;
 import com.jodak.repositories.CountryRepository;
-import com.jodak.repositories.DisciplineRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,10 +36,6 @@ class AthleteIT extends AbstractIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private AthleteRepository athleteRepository;
-    @Autowired
-    private DisciplineRepository disciplineRepository;
-    @Autowired
     private CountryRepository countryRepository;
 
     private Long disciplineId;
@@ -49,8 +43,7 @@ class AthleteIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        athleteRepository.deleteAll();
-        disciplineRepository.deleteAll();
+        // Le nettoyage des tables est assuré par AbstractIntegrationTest#resetDatabase.
         disciplineId = disciplineRepository.save(Discipline.builder().name("Athlétisme").build()).getId();
         Country country = countryRepository.findAll().get(0); // nation issue du jeu de référence (V2)
         countryId = country.getId();

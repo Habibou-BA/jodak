@@ -12,4 +12,5 @@ public final class ApiPaths {
     public static final String DISCIPLINES = API_V1 + "/disciplines";
     public static final String COUNTRIES = API_V1 + "/countries";
     public static final String ATHLETES = API_V1 + "/athletes";
+    public static final String EPREUVES = API_V1 + "/epreuves";
 }
