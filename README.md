@@ -102,7 +102,30 @@ Web Service en **lecture seule** pour le SI historique (contrat XSD). *À venir 
 
 ## Tests
 
-JUnit 5 + Mockito (unitaires) et Testcontainers PostgreSQL (intégration). *Ajoutés progressivement.*
+- **Tests unitaires** (JUnit 5 + Mockito) — rapides, sans Docker :
+
+  ```bash
+  mvn test
+  ```
+
+- **Tests d'intégration** (`*IT`, Testcontainers PostgreSQL) — nécessitent Docker, via `mvn verify` :
+
+  ```bash
+  mvn verify
+  ```
+
+### Note macOS / Docker Desktop (Docker Engine ≥ 29)
+
+Sur cette machine, le socket Docker par défaut (`/var/run/docker.sock`) est indisponible et Docker 29
+impose une API minimale ≥ 1.40. Pour exécuter les tests d'intégration en local :
+
+```bash
+export DOCKER_HOST="unix://$HOME/Library/Containers/com.docker.docker/Data/docker.raw.sock"
+export TESTCONTAINERS_RYUK_DISABLED=true
+mvn -DargLine="-Dapi.version=1.43" verify
+```
+
+En CI (Linux, socket Docker standard), `mvn verify` fonctionne sans ces réglages.
 
 ## Collection Postman
 
