@@ -95,6 +95,170 @@
             },
             "description": "Réponses : 204 (supprimée), 404 (introuvable), 409 (référencée)."
           }
+        },
+        {
+          "name": "Athlètes d'une discipline (paginé)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/disciplines/1/athletes?page=0&size=20&sort=lastName,asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "disciplines", "1", "athletes"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "lastName,asc" }
+              ]
+            },
+            "description": "Réponses : 200, 404 (discipline introuvable)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Nations",
+      "item": [
+        {
+          "name": "Ajouter une nation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/countries",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "countries"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"AUT\",\n  \"name\": \"Autriche\"\n}" },
+            "description": "Réponses : 201, 400 (invalide), 409 (code/nom déjà utilisé)."
+          }
+        },
+        {
+          "name": "Lister les nations (paginé)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/countries?page=0&size=50&sort=name,asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "countries"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "50" },
+                { "key": "sort", "value": "name,asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consulter une nation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/countries/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "countries", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Athlètes",
+      "item": [
+        {
+          "name": "Créer un athlète",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "athletes"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastName\": \"Bolt\",\n  \"firstName\": \"Usain\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"1986-08-21\",\n  \"countryId\": 1,\n  \"disciplineId\": 1,\n  \"heightCm\": 195,\n  \"weightKg\": 94\n}"
+            },
+            "description": "Réponses : 201, 400 (invalide), 404 (nationalité/discipline introuvable)."
+          }
+        },
+        {
+          "name": "Rechercher des athlètes (multicritère, paginé)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes?gender=MALE&disciplineId=1&page=0&size=20&sort=lastName,asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "athletes"],
+              "query": [
+                { "key": "gender", "value": "MALE" },
+                { "key": "disciplineId", "value": "1" },
+                { "key": "countryId", "value": "1", "disabled": true },
+                { "key": "lastName", "value": "bol", "disabled": true },
+                { "key": "birthDateFrom", "value": "1980-01-01", "disabled": true },
+                { "key": "birthDateTo", "value": "2000-12-31", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "lastName,asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consulter un athlète",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "athletes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Modifier un athlète (complet)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "athletes", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastName\": \"Bolt\",\n  \"firstName\": \"Usain\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"1986-08-21\",\n  \"countryId\": 1,\n  \"disciplineId\": 1,\n  \"heightCm\": 195,\n  \"weightKg\": 96\n}"
+            }
+          }
+        },
+        {
+          "name": "Modifier un athlète (partiel)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "athletes", "1"]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"weightKg\": 80\n}" }
+          }
+        },
+        {
+          "name": "Supprimer un athlète",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "athletes", "1"]
+            }
+          }
         }
       ]
     }

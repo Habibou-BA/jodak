@@ -2,6 +2,7 @@ package com.jodak.mappers;
 
 import com.jodak.dtos.discipline.DisciplineRequest;
 import com.jodak.dtos.discipline.DisciplineResponse;
+import com.jodak.dtos.discipline.DisciplineSummary;
 import com.jodak.entities.Discipline;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,10 @@ public class DisciplineMapper {
                 entity.getName(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
+    }
+
+    public DisciplineSummary toSummary(Discipline entity) {
+        return new DisciplineSummary(entity.getId(), entity.getName());
     }
 
     private String normalize(String value) {

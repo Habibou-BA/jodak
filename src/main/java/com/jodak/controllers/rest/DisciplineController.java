@@ -1,9 +1,11 @@
 package com.jodak.controllers.rest;
 
 import com.jodak.constants.ApiPaths;
+import com.jodak.dtos.athlete.AthleteResponse;
 import com.jodak.dtos.common.PageResponse;
 import com.jodak.dtos.discipline.DisciplineRequest;
 import com.jodak.dtos.discipline.DisciplineResponse;
+import com.jodak.services.interfaces.AthleteService;
 import com.jodak.services.interfaces.DisciplineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,6 +40,7 @@ import java.net.URI;
 public class DisciplineController {
 
     private final DisciplineService service;
+    private final AthleteService athleteService;
 
     @PostMapping
     @Operation(summary = "Créer une discipline")
@@ -95,5 +98,18 @@ public class DisciplineController {
     })
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @GetMapping("/{id}/athletes")
+    @Operation(summary = "Lister les athlètes d'une discipline (paginé et trié)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Athlètes de la discipline"),
+            @ApiResponse(responseCode = "404", description = "Discipline introuvable")
+    })
+    public PageResponse<AthleteResponse> getAthletes(
+            @PathVariable Long id,
+            @PageableDefault(size = 20, sort = "lastName") Pageable pageable) {
+        service.getById(id); // déclenche un 404 si la discipline n'existe pas
+        return athleteService.getByDiscipline(id, pageable);
     }
 }
