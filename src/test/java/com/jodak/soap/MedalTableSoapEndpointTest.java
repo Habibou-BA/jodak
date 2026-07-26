@@ -4,9 +4,9 @@ import com.jodak.dtos.country.CountrySummary;
 import com.jodak.dtos.medaltable.MedalTableRowResponse;
 import com.jodak.services.interfaces.MedalTableService;
 import com.jodak.soap.endpoints.MedalTableSoapEndpoint;
-import com.jodak.soap.generated.GetMedalTableRequest;
-import com.jodak.soap.generated.GetMedalTableResponse;
 import com.jodak.soap.mappers.SoapMapper;
+import com.jodak.soap.xml.GetMedalTableRequest;
+import com.jodak.soap.xml.GetMedalTableResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

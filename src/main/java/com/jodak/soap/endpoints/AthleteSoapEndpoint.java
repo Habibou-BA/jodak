@@ -1,9 +1,9 @@
 package com.jodak.soap.endpoints;
 
 import com.jodak.services.interfaces.AthleteService;
-import com.jodak.soap.generated.GetAthleteRequest;
-import com.jodak.soap.generated.GetAthleteResponse;
 import com.jodak.soap.mappers.SoapMapper;
+import com.jodak.soap.xml.GetAthleteRequest;
+import com.jodak.soap.xml.GetAthleteResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;

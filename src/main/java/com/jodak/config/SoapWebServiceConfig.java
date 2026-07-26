@@ -4,6 +4,12 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.jodak.soap.xml.Athlete;
+import com.jodak.soap.xml.GetAthleteRequest;
+import com.jodak.soap.xml.GetAthleteResponse;
+import com.jodak.soap.xml.GetMedalTableRequest;
+import com.jodak.soap.xml.GetMedalTableResponse;
+import com.jodak.soap.xml.MedalTableRow;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.config.annotation.EnableWs;
@@ -49,7 +55,10 @@ public class SoapWebServiceConfig extends WsConfigurerAdapter {
     @Bean
     public Jaxb2Marshaller marshaller() {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath("com.jodak.soap.generated");
+        marshaller.setClassesToBeBound(
+                GetAthleteRequest.class, GetAthleteResponse.class,
+                GetMedalTableRequest.class, GetMedalTableResponse.class,
+                Athlete.class, MedalTableRow.class);
         return marshaller;
     }
 }

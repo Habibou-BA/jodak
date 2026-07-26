@@ -1,9 +1,9 @@
 package com.jodak.soap.endpoints;
 
 import com.jodak.services.interfaces.MedalTableService;
-import com.jodak.soap.generated.GetMedalTableRequest;
-import com.jodak.soap.generated.GetMedalTableResponse;
 import com.jodak.soap.mappers.SoapMapper;
+import com.jodak.soap.xml.GetMedalTableRequest;
+import com.jodak.soap.xml.GetMedalTableResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;

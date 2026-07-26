@@ -11,10 +11,10 @@ import com.jodak.repositories.CountryRepository;
 import com.jodak.repositories.DisciplineRepository;
 import com.jodak.repositories.EpreuveRepository;
 import com.jodak.repositories.ResultatRepository;
-import com.jodak.soap.generated.GetAthleteRequest;
-import com.jodak.soap.generated.GetAthleteResponse;
-import com.jodak.soap.generated.GetMedalTableRequest;
-import com.jodak.soap.generated.GetMedalTableResponse;
+import com.jodak.soap.xml.GetAthleteRequest;
+import com.jodak.soap.xml.GetAthleteResponse;
+import com.jodak.soap.xml.GetMedalTableRequest;
+import com.jodak.soap.xml.GetMedalTableResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -87,8 +87,10 @@ class SoapEndpointIT {
 
     private WebServiceTemplate template() {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath("com.jodak.soap.generated");
-        // Le contexte JAXB est initialisé paresseusement au premier échange.
+        marshaller.setClassesToBeBound(
+                GetAthleteRequest.class, GetAthleteResponse.class,
+                GetMedalTableRequest.class, GetMedalTableResponse.class,
+                com.jodak.soap.xml.Athlete.class, com.jodak.soap.xml.MedalTableRow.class);
         return new WebServiceTemplate(marshaller);
     }
 
