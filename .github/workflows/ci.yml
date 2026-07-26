@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Récupération du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Installation du JDK 21 (Temurin) + cache Maven
         uses: actions/setup-java@v4
@@ -75,7 +75,7 @@ jobs:
       packages: write
     steps:
       - name: Récupération du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Nom d'image en minuscules (contrainte GHCR)
         id: image
