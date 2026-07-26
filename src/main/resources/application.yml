@@ -57,9 +57,17 @@ admin:
   bootstrap:
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}
+  # Réinitialisation de la plateforme (désactivée par défaut, notamment en production).
+  reset:
+    enabled: ${ADMIN_RESET_ENABLED:false}
+    confirmation-phrase: ${ADMIN_RESET_CONFIRMATION_PHRASE:REINITIALISER-DAKAR-2026}
 
 # Import asynchrone de données.
 import:
   storage-dir: ${IMPORT_STORAGE_DIR:${java.io.tmpdir}/jodak-imports}
   chunk-size: ${IMPORT_CHUNK_SIZE:500}
   max-concurrent-jobs: ${IMPORT_MAX_CONCURRENT_JOBS:2}
+
+# Sauvegarde logique (export ZIP).
+backup:
+  storage-dir: ${BACKUP_STORAGE_DIR:${java.io.tmpdir}/jodak-backups}
