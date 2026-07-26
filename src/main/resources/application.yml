@@ -17,6 +17,10 @@ spring:
   mvc:
     problemdetails:
       enabled: true             # erreurs au format ProblemDetail (RFC 7807)
+  servlet:
+    multipart:
+      max-file-size: ${IMPORT_MAX_FILE_SIZE:25MB}
+      max-request-size: ${IMPORT_MAX_REQUEST_SIZE:30MB}
 
 server:
   port: 8080
@@ -53,3 +57,9 @@ admin:
   bootstrap:
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}
+
+# Import asynchrone de données.
+import:
+  storage-dir: ${IMPORT_STORAGE_DIR:${java.io.tmpdir}/jodak-imports}
+  chunk-size: ${IMPORT_CHUNK_SIZE:500}
+  max-concurrent-jobs: ${IMPORT_MAX_CONCURRENT_JOBS:2}

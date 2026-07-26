@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jodak.admin.entities.AdminUser;
 import com.jodak.admin.enums.AdminRole;
 import com.jodak.admin.repositories.AdminUserRepository;
+import com.jodak.admin.repositories.ImportJobRepository;
 import com.jodak.admin.repositories.RefreshTokenRepository;
 import com.jodak.dtos.discipline.DisciplineRequest;
 import com.jodak.repositories.AthleteRepository;
@@ -57,6 +58,8 @@ class AdminAuthIT {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
     @Autowired
+    private ImportJobRepository importJobRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private ResultatRepository resultatRepository;
@@ -73,6 +76,7 @@ class AdminAuthIT {
         athleteRepository.deleteAll();
         epreuveRepository.deleteAll();
         disciplineRepository.deleteAll();
+        importJobRepository.deleteAll(); // import_job.created_by référence admin_user (RESTRICT)
         refreshTokenRepository.deleteAll();
         adminUserRepository.deleteAll();
         adminUserRepository.save(AdminUser.builder()

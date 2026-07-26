@@ -21,6 +21,11 @@ public class AdminExceptionHandler {
         return build(HttpStatus.LOCKED, "Compte verrouillé", ex.getMessage());
     }
 
+    @ExceptionHandler(ImportValidationException.class)
+    public ProblemDetail handleImportValidation(ImportValidationException ex) {
+        return build(HttpStatus.BAD_REQUEST, "Import invalide", ex.getMessage());
+    }
+
     private ProblemDetail build(HttpStatus status, String title, String detail) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
         problem.setTitle(title);
