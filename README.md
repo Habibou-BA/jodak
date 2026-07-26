@@ -1,5 +1,9 @@
 # Plateforme JO — API REST & Web Service SOAP
 
+<!-- Remplacez OWNER/REPO par le chemin de votre dépôt GitHub. -->
+[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/OWNER/REPO/actions/workflows/codeql.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/codeql.yml)
+
 Plateforme numérique centralisée des Jeux Olympiques : gestion des disciplines, athlètes, épreuves
 et résultats, calcul automatique du tableau des médailles et statistiques. Elle expose
 **simultanément** une **API REST** (applications Web/Mobile) et un **Web Service SOAP en lecture
@@ -24,6 +28,7 @@ seule** (système d'information historique), au-dessus d'un **socle de services 
 - [Administration (sécurisé)](#administration-sécurisé)
 - [Supervision](#supervision)
 - [Tests](#tests)
+- [Intégration continue (CI/CD)](#intégration-continue-cicd)
 - [Commandes Maven](#commandes-maven)
 - [Organisation des packages](#organisation-des-packages)
 - [Collection Postman](#collection-postman)
@@ -267,6 +272,30 @@ Si Testcontainers ne trouve pas le démon Docker (ex. socket Docker Desktop non 
 export DOCKER_HOST="unix://$HOME/Library/Containers/com.docker.docker/Data/docker.raw.sock"
 mvn verify
 ```
+
+## Intégration continue (CI/CD)
+
+Trois workflows GitHub Actions (dossier [`.github`](.github)) :
+
+| Workflow | Fichier | Déclencheurs | Rôle |
+|---|---|---|---|
+| **CI** | [`ci.yml`](.github/workflows/ci.yml) | push `main`/tags `v*`, PR vers `main`, manuel | `mvn clean verify` (JDK 21 Temurin, cache Maven, tests **Testcontainers**), publie les rapports de tests et le jar ; puis, hors PR, **construit et publie l'image Docker sur GHCR** |
+| **CodeQL** | [`codeql.yml`](.github/workflows/codeql.yml) | push/PR `main`, hebdomadaire | Analyse statique de sécurité (SAST) du code Java |
+| **Dependabot** | [`dependabot.yml`](.github/dependabot.yml) | hebdomadaire | Propose par PR les mises à jour Maven et des actions GitHub |
+
+**Détails**
+- Le runner `ubuntu-latest` fournit un démon Docker : les tests d'intégration Testcontainers
+  s'exécutent sans réglage (Ryuk désactivé via `src/test/resources/testcontainers.properties`).
+- L'image est publiée sur **GitHub Container Registry** : `ghcr.io/<owner>/olympics-platform`,
+  taguée par branche, version sémantique (`v1.2.3`), SHA court, et `latest` sur `main`. La
+  publication utilise le `GITHUB_TOKEN` (permission `packages: write`) — aucun secret à configurer.
+- Récupérer l'image : `docker pull ghcr.io/<owner>/olympics-platform:latest`.
+
+**Mise en route (dépôt public)**
+1. Remplacez `OWNER/REPO` dans les badges ci-dessus par le chemin de votre dépôt.
+2. Poussez le code : le workflow **CI** démarre automatiquement.
+3. Le package GHCR est privé par défaut ; rendez-le public via *Packages → Package settings*
+   si vous souhaitez un `docker pull` anonyme.
 
 ## Commandes Maven
 
