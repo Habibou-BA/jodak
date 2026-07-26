@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Pagination réutilisable : le contrôleur/vue fournit les URL préc./suiv. déjà construites. -->
+<div th:fragment="pager(prevUrl, nextUrl, info, first, last)" class="pagination">
+    <span class="info" th:text="${info}">Page 1</span>
+    <div class="controls">
+        <a class="page-link" th:classappend="${first} ? 'disabled'" th:href="${prevUrl}" aria-label="Page précédente">‹&nbsp;Préc.</a>
+        <a class="page-link" th:classappend="${last} ? 'disabled'" th:href="${nextUrl}" aria-label="Page suivante">Suiv.&nbsp;›</a>
+    </div>
+</div>
+</body>
+</html>

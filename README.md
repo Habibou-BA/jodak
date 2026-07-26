@@ -13,6 +13,7 @@ seule** (système d'information historique), au-dessus d'un **socle de services 
 - [Architecture](#architecture)
 - [Modèle de données](#modèle-de-données)
 - [Flux métier — enregistrement d'un résultat](#flux-métier--enregistrement-dun-résultat)
+- [Interface web (Thymeleaf)](#interface-web-thymeleaf)
 - [Technologies](#technologies)
 - [Prérequis](#prérequis)
 - [Lancement](#lancement)
@@ -97,7 +98,7 @@ flowchart TD
 ## Technologies
 
 Java 21 · Spring Boot 3.3 · Maven · PostgreSQL 16 · Spring Data JPA · Spring Validation ·
-Spring Web · Spring WS (SOAP) · SpringDoc OpenAPI/Swagger · Lombok · Flyway · Actuator ·
+Spring Web · Spring WS (SOAP) · Thymeleaf · SpringDoc OpenAPI/Swagger · Lombok · Flyway · Actuator ·
 Docker / Docker Compose · JUnit 5 · Mockito · Testcontainers · JAXB.
 
 **Interdits** : MapStruct, Gradle.
@@ -153,6 +154,23 @@ Variables d'environnement (profil `prod`) : `SPRING_DATASOURCE_URL`,
   idempotent, réalignant les séquences d'identité après insertion. Étant un callback, il n'est
   **pas** enregistré dans l'historique Flyway — aucune contamination entre profils (le profil
   `prod` n'inclut pas `db/seed`).
+
+## Interface web (Thymeleaf)
+
+Un site server-side (Thymeleaf) présente les données de façon moderne et responsive
+(mobile → desktop), en **réutilisant les mêmes services** que l'API (aucune logique dupliquée) :
+
+| Page | URL | Contenu |
+|---|---|---|
+| Accueil | `/` | Page d'accueil **Dakar 2026** : présentation du JOJ, compte à rebours, faits clés, mascotte |
+| Tableau de bord | `/dashboard` | Nation en tête, statistiques, médailles, classement par points |
+| Disciplines | `/disciplines` | Grille des disciplines (→ athlètes) |
+| Athlètes | `/athletes` | Recherche multicritère (nom, sexe, discipline), pagination |
+| Épreuves | `/epreuves` | Filtre par discipline, dates |
+| Médailles | `/medailles` | Tableau des médailles + classement par points |
+
+Thème sombre « encre » avec accent or, typographies distinctives (Bricolage Grotesque / IBM Plex),
+menu adaptatif, tables défilables sur mobile, micro-animations au chargement.
 
 ## API REST & Swagger
 
