@@ -149,8 +149,10 @@ Variables d'environnement (profil `prod`) : `SPRING_DATASOURCE_URL`,
 - Migrations **Flyway en SQL brut** (`src/main/resources/db/migration`) : `V1` disciplines →
   `V5` résultats. Contraintes portées par la base (PK, FK, UNIQUE, CHECK, INDEX).
 - `hibernate.ddl-auto=validate` : Hibernate **valide** le schéma, ne le modifie jamais.
-- **Jeu de démo** (`db/seed`, profil `dev` uniquement) : migration répétable et idempotente,
-  réalignant les séquences d'identité après insertion.
+- **Jeu de démo** (`db/seed`, profil `dev` uniquement) : **callback Flyway `afterMigrate`**
+  idempotent, réalignant les séquences d'identité après insertion. Étant un callback, il n'est
+  **pas** enregistré dans l'historique Flyway — aucune contamination entre profils (le profil
+  `prod` n'inclut pas `db/seed`).
 
 ## API REST & Swagger
 
