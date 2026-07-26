@@ -21,6 +21,7 @@ seule** (système d'information historique), au-dessus d'un **socle de services 
 - [Base de données, Flyway & jeu de démo](#base-de-données-flyway--jeu-de-démo)
 - [API REST & Swagger](#api-rest--swagger)
 - [Web Service SOAP](#web-service-soap)
+- [Administration (sécurisé)](#administration-sécurisé)
 - [Supervision](#supervision)
 - [Tests](#tests)
 - [Commandes Maven](#commandes-maven)
@@ -40,6 +41,7 @@ seule** (système d'information historique), au-dessus d'un **socle de services 
 | **Tableau des médailles** | `GET /tableau-medailles` | Classement or→argent→bronze (départage A→Z) |
 | **Tableau de bord** | `GET /tableau-de-bord` (+ `/classement-points`) | Compteurs + points (Or=7, Argent=4, Bronze=1) |
 | **SOAP** | `GetAthlete`, `GetMedalTable` | Lecture seule (SI historique), contrat XSD/WSDL |
+| **Administration** | `/api/admin/**` + console `/backoffice` | JWT, import async CSV/XLSX, export/sauvegarde/réinitialisation, journal |
 
 ## Architecture
 
@@ -142,13 +144,30 @@ de quoi obtenir immédiatement un tableau des médailles peuplé.
 | `test` | Testcontainers | `db/migration` | Tests d'intégration |
 | `prod` | Variables d'environnement | `db/migration` | Production / Docker |
 
-Variables d'environnement (profil `prod`) : `SPRING_DATASOURCE_URL`,
-`SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`.
+Les variables d'environnement sont documentées dans [`.env.example`](.env.example) (à copier en
+`.env` local, **non versionné**). En profil `dev`, `spring-dotenv` charge automatiquement `.env` au
+démarrage ; en `prod`, ces variables proviennent de l'environnement (ou de `docker-compose`).
+
+| Variable | Rôle | Défaut |
+|---|---|---|
+| `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | Connexion PostgreSQL (prod) | — |
+| `JWT_SECRET` | Clé HMAC des jetons (≥ 64 caractères) | clé de dev |
+| `JWT_ISSUER` · `JWT_ACCESS_TTL` · `JWT_REFRESH_TTL` | Émetteur et durées de vie des jetons | `jodak` · `PT15M` · `P7D` |
+| `ADMIN_EMAIL` · `ADMIN_PASSWORD` | Compte administrateur créé au démarrage **s'il n'en existe aucun** | — |
+| `IMPORT_MAX_FILE_SIZE_BYTES` · `IMPORT_MAX_UNCOMPRESSED_BYTES` · `IMPORT_MIN_INFLATE_RATIO` | Durcissement des fichiers importés | 25 Mio · 200 Mio · 0.01 |
+| `BACKUP_STORAGE_DIR` | Répertoire des sauvegardes | `${tmp}/jodak-backups` |
+| `ADMIN_RESET_ENABLED` · `ADMIN_RESET_CONFIRMATION_PHRASE` | Réinitialisation (désactivée par défaut, double confirmation) | `false` · `REINITIALISER-DAKAR-2026` |
+
+> **Amorçage du back-office (dev)** : renseignez `ADMIN_EMAIL` et `ADMIN_PASSWORD` dans un fichier
+> `.env`, lancez `mvn spring-boot:run`, puis connectez-vous sur
+> [`/backoffice/login`](http://localhost:8080/backoffice/login). L'admin n'est (re)créé que si la
+> table est vide — `docker compose down -v` remet la base à zéro.
 
 ## Base de données, Flyway & jeu de démo
 
 - Migrations **Flyway en SQL brut** (`src/main/resources/db/migration`) : `V1` disciplines →
-  `V5` résultats. Contraintes portées par la base (PK, FK, UNIQUE, CHECK, INDEX).
+  `V5` résultats, puis `V6`–`V9` pour l'administration (`admin_user`, `refresh_token`, `admin_log`,
+  `import_job`). Contraintes portées par la base (PK, FK, UNIQUE, CHECK, INDEX).
 - `hibernate.ddl-auto=validate` : Hibernate **valide** le schéma, ne le modifie jamais.
 - **Jeu de démo** (`db/seed`, profil `dev` uniquement) : **callback Flyway `afterMigrate`**
   idempotent, réalignant les séquences d'identité après insertion. Étant un callback, il n'est
@@ -199,6 +218,38 @@ Exemple d'enveloppe :
 </soapenv:Envelope>
 ```
 
+## Administration (sécurisé)
+
+Module d'administration protégé par **Spring Security 6 + JWT**, exposé en deux temps : une **API
+REST** `/api/admin/**` et une **console web** Thymeleaf isolée `/backoffice` (non référencée depuis
+le site public). Spécification complète : [`docs/admin.md`](docs/admin.md).
+
+**Modèle de sécurité (Option A)** — la lecture reste publique, les écritures et l'administration
+sont protégées :
+
+| Portée | Règle |
+|---|---|
+| `GET /api/v1/**`, vues web, Swagger, SOAP, `/actuator/health` | Public |
+| `POST/PUT/PATCH/DELETE /api/v1/**` et `/api/admin/**` | `ROLE_ADMIN` ou `ROLE_SUPER_ADMIN` (JWT) |
+
+Authentification **stateless** : `POST /api/admin/auth/login` renvoie un *access token* (courte
+durée) et un *refresh token* (rotation à chaque `refresh`) ; verrouillage du compte après 5 échecs.
+Le jeton se transmet via l'en-tête `Authorization: Bearer <token>`.
+
+| Domaine | Endpoints | Détails |
+|---|---|---|
+| **Authentification** | `POST /api/admin/auth/{login,refresh,logout}` | JWT, rotation, verrouillage |
+| **Import asynchrone** | `POST /api/admin/imports` · `GET .../{id}` · `.../{id}/errors` · `.../{id}/cancel` · `.../{id}/rollback` | **CSV & XLSX**, DRY_RUN/COMMIT, progression, annulation, compensation, rapport d'erreurs |
+| **Export** | `GET /api/admin/export` | Archive ZIP (CSV par domaine + `metadata.json`, empreintes SHA-256) |
+| **Sauvegarde** | `POST /api/admin/backup` · `GET .../{fileName}/download` | Sauvegarde logique côté serveur |
+| **Réinitialisation** | `POST /api/admin/reset` | Destructif, **désactivé par défaut**, double confirmation (mot de passe + phrase), sauvegarde préalable |
+| **Journal** | `GET /api/admin/logs` | Audit des actions d'administration |
+
+**Durcissement des imports** : taille bornée, cohérence extension ↔ format, et pour les `.xlsx`
+(archives ZIP lues par Apache POI) protections **anti « zip bomb »** (ratio et taille de
+décompression bornés), **XXE** (entités externes XML désactivées) et **zip slip** (aucune extraction
+disque) — voir `PoiSecurityConfig` et `ImportFileValidator`. Fichiers d'exemple : `sample-imports/`.
+
 ## Supervision
 
 Spring Boot Actuator expose la santé : `GET /actuator/health` (utilisée par le healthcheck Docker).
@@ -237,7 +288,14 @@ soap/{endpoints,mappers,generated} · specifications · utils · validators
 ## Collection Postman
 
 `postman/JO-Platform.postman_collection.json` — organisée par domaine (Disciplines, Nations,
-Athlètes, Épreuves, Résultats, Tableau des médailles, Tableau de bord, SOAP). Variable `baseUrl`.
+Athlètes, Épreuves, Résultats, Tableau des médailles, Tableau de bord, SOAP, **Administration**).
+Variable `baseUrl`.
+
+Le dossier **Administration** couvre l'authentification, l'import (CSV/XLSX), l'export, la
+sauvegarde, la réinitialisation et le journal. Lancez d'abord **Administration › Authentification ›
+Connexion** : le script de test stocke l'*access token* dans la variable `token`, réutilisée
+automatiquement (auth **Bearer** au niveau de la collection). Renseignez `adminEmail` /
+`adminPassword` dans les variables de la collection.
 
 ## Documentation de conception
 
