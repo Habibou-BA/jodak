@@ -136,4 +136,14 @@ class AdminAuthIT {
                         .content("{\"email\":\"" + EMAIL + "\",\"password\":\"mauvais\"}"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    @DisplayName("Le journal d'administration est consultable et trace la connexion")
+    void adminLogsAreListed() throws Exception {
+        String token = login(EMAIL, PASSWORD);
+        mockMvc.perform(get("/api/admin/logs").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements",
+                        org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+    }
 }

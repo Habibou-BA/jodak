@@ -1,8 +1,12 @@
 package com.jodak.admin.services;
 
+import com.jodak.admin.dtos.AdminLogResponse;
 import com.jodak.admin.entities.AdminLog;
 import com.jodak.admin.repositories.AdminLogRepository;
+import com.jodak.dtos.common.PageResponse;
+import com.jodak.utils.PageResponseFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +32,14 @@ public class AdminLogService {
                 .ip(ip)
                 .userAgent(truncate(userAgent, 300))
                 .build());
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<AdminLogResponse> search(Pageable pageable) {
+        return PageResponseFactory.from(
+                adminLogRepository.findAllByOrderByCreatedAtDesc(pageable),
+                log -> new AdminLogResponse(log.getId(), log.getAdminId(), log.getAction(),
+                        log.isSuccess(), log.getMessage(), log.getIp(), log.getCreatedAt()));
     }
 
     private String truncate(String value, int max) {

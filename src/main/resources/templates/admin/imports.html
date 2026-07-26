@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, 'imports', ~{::content})}">
+<head><title>Imports</title></head>
+<body>
+<div th:fragment="content">
+    <section class="panel">
+        <h2>Nouvel import</h2>
+        <form id="import-form" class="grid-form">
+            <label>Fichier (CSV)
+                <input type="file" name="file" accept=".csv,text/csv" required/>
+            </label>
+            <label>Type
+                <select name="jobType">
+                    <option value="DISCIPLINE">Disciplines</option>
+                    <option value="ATHLETE">Athlètes</option>
+                </select>
+            </label>
+            <label>Mode
+                <select name="mode">
+                    <option value="DRY_RUN">Simulation (DRY_RUN)</option>
+                    <option value="COMMIT">Import réel (COMMIT)</option>
+                </select>
+            </label>
+            <label>Doublons
+                <select name="duplicateStrategy">
+                    <option value="SKIP">Ignorer</option>
+                    <option value="UPDATE">Mettre à jour</option>
+                    <option value="REJECT">Rejeter</option>
+                </select>
+            </label>
+            <input type="hidden" name="format" value="CSV"/>
+            <button class="btn primary" type="submit">Lancer l'import</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Jobs récents</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr><th>#</th><th>Type</th><th>Mode</th><th>Statut</th><th>Progression</th>
+                    <th>Importées</th><th>Ignorées</th><th>Échecs</th><th></th></tr>
+                </thead>
+                <tbody data-jobs>
+                <tr><td colspan="9" class="muted">Chargement…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+</body>
+</html>
