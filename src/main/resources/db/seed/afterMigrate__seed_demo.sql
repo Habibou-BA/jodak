@@ -1,4 +1,7 @@
--- Jeu de démonstration (profil dev uniquement). Migration répétable et idempotente.
+-- Jeu de démonstration (profil dev uniquement) — callback Flyway "afterMigrate".
+-- Un callback n'est PAS enregistré dans flyway_schema_history : aucun risque de contamination
+-- entre profils (le profil prod n'inclut pas db/seed et ne verra jamais ce script).
+-- Script idempotent : rejoué à chaque démarrage en dev sans effet de bord.
 -- Les nations proviennent du référentiel de V2 ; on les référence par leur code.
 
 INSERT INTO discipline (id, name) VALUES
