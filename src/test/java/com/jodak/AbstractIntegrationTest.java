@@ -7,6 +7,7 @@ import com.jodak.repositories.ResultatRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -24,6 +25,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  */
 @ActiveProfiles("test")
 @SpringBootTest
+@WithMockUser(roles = "ADMIN") // les mutations /api/v1/** sont protégées (Option A)
 public abstract class AbstractIntegrationTest {
 
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");

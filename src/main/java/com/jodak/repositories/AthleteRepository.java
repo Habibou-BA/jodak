@@ -15,4 +15,7 @@ public interface AthleteRepository
     /** Nombre de nations distinctes ayant au moins un athlète (pays participants). */
     @Query("select count(distinct a.country.id) from Athlete a")
     long countParticipatingCountries();
+
+    boolean existsByLastNameIgnoreCaseAndFirstNameIgnoreCaseAndBirthDate(
+            String lastName, String firstName, java.time.LocalDate birthDate);
 }
