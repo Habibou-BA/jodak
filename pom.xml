@@ -21,7 +21,7 @@
         <java.version>21</java.version>
         <springdoc.version>2.6.0</springdoc.version>
         <jjwt.version>0.12.6</jjwt.version>
-        <poi.version>5.3.0</poi.version>
+        <poi.version>5.5.1</poi.version>
         <!-- Client docker-java auto-négociant l'API Docker (compatible Docker Engine récent). -->
         <testcontainers.version>1.20.6</testcontainers.version>
     </properties>
