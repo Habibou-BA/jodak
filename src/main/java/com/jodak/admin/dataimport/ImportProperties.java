@@ -9,6 +9,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record ImportProperties(
         String storageDir,
         int chunkSize,
-        int maxConcurrentJobs
+        int maxConcurrentJobs,
+        long maxFileSizeBytes,
+        long maxUncompressedBytes,
+        double minInflateRatio
 ) {
 }

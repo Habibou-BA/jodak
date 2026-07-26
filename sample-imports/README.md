@@ -1,14 +1,20 @@
 # Fichiers d'exemple d'import
 
-Ces fichiers permettent de tester l'import asynchrone (format **CSV** ; XLSX à venir).
+Ces fichiers permettent de tester l'import asynchrone. Deux formats sont pris en charge :
+**CSV** et **XLSX** (Apache POI). Un `.xlsx` reprend les **mêmes colonnes** que le CSV (première
+ligne = en-tête, première feuille utilisée).
+
+Le fichier téléversé est durci contre les archives malveillantes : taille bornée (25 Mio),
+cohérence extension/format vérifiée, et pour les `.xlsx` protection anti « zip bomb » / XXE
+(décompression bornée, entités externes XML désactivées).
 
 ## Endpoint
 
 ```
 POST /api/admin/imports        (multipart, ROLE_ADMIN)
-  file               : le fichier CSV
+  file               : le fichier CSV ou XLSX
   jobType            : DISCIPLINE | ATHLETE
-  format             : CSV
+  format             : CSV | XLSX
   mode               : DRY_RUN (validation seule) | COMMIT (import réel)
   duplicateStrategy  : SKIP | UPDATE | REJECT
 ```

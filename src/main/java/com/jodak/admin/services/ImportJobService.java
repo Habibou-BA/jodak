@@ -2,6 +2,7 @@ package com.jodak.admin.services;
 
 import com.jodak.admin.dataimport.ImportExecutor;
 import com.jodak.admin.dataimport.ImportFileStorage;
+import com.jodak.admin.dataimport.ImportFileValidator;
 import com.jodak.admin.dataimport.RowImporterRegistry;
 import com.jodak.admin.dtos.ImportErrorResponse;
 import com.jodak.admin.dtos.ImportJobResponse;
@@ -47,6 +48,7 @@ public class ImportJobService {
     private final ImportJobErrorRepository importJobErrorRepository;
     private final ImportJobRecordRepository importJobRecordRepository;
     private final ImportFileStorage importFileStorage;
+    private final ImportFileValidator importFileValidator;
     private final RowImporterRegistry importerRegistry;
     private final ImportExecutor importExecutor;
     private final ImportJobMapper mapper;
@@ -58,9 +60,7 @@ public class ImportJobService {
         if (!importerRegistry.supports(jobType)) {
             throw new ImportValidationException("Type d'import non pris en charge : " + jobType);
         }
-        if (format != ImportFormat.CSV) {
-            throw new ImportValidationException("Seul le format CSV est pris en charge pour le moment.");
-        }
+        importFileValidator.validate(file, format);
         ImportFileStorage.StoredFile stored = importFileStorage.store(file);
         if (importJobRepository.existsByContentHashAndJobTypeAndStatusIn(stored.hash(), jobType,
                 List.of(ImportStatus.PENDING, ImportStatus.RUNNING))) {

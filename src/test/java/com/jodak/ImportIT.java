@@ -14,6 +14,9 @@ import com.jodak.repositories.AthleteRepository;
 import com.jodak.repositories.DisciplineRepository;
 import com.jodak.repositories.EpreuveRepository;
 import com.jodak.repositories.ResultatRepository;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +30,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 
@@ -122,6 +126,36 @@ class ImportIT {
         return objectMapper.readTree(body).get("id").asLong();
     }
 
+    private long uploadXlsx(byte[] content, String jobType, String mode) throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "import.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", content);
+        String body = mockMvc.perform(multipart("/api/admin/imports")
+                        .file(file)
+                        .param("jobType", jobType)
+                        .param("format", "XLSX")
+                        .param("mode", mode)
+                        .param("duplicateStrategy", "SKIP")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(body).get("id").asLong();
+    }
+
+    /** Construit un classeur XLSX en mémoire : première ligne = en-tête, puis une ligne par valeur. */
+    private byte[] xlsx(String header, String... rows) throws Exception {
+        try (XSSFWorkbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("data");
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue(header);
+            for (int i = 0; i < rows.length; i++) {
+                sheet.createRow(i + 1).createCell(0).setCellValue(rows[i]);
+            }
+            workbook.write(out);
+            return out.toByteArray();
+        }
+    }
+
     private JsonNode awaitTerminal(long jobId) throws Exception {
         for (int i = 0; i < 100; i++) {
             String body = mockMvc.perform(get("/api/admin/imports/{id}", jobId)
@@ -183,5 +217,32 @@ class ImportIT {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         assertThat(objectMapper.readTree(errors).get("totalElements").asLong()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("COMMIT d'un fichier XLSX persiste les disciplines importées")
+    void xlsxCommitPersists() throws Exception {
+        long jobId = uploadXlsx(xlsx("name", "Judo", "Escrime", "Taekwondo"), "DISCIPLINE", "COMMIT");
+        JsonNode job = awaitTerminal(jobId);
+
+        assertThat(job.get("status").asText()).isEqualTo("COMPLETED");
+        assertThat(job.get("importedRows").asLong()).isEqualTo(3);
+        assertThat(job.get("failedRows").asLong()).isZero();
+        assertThat(disciplineRepository.count()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("Une extension incohérente avec le format est rejetée (400)")
+    void rejectsExtensionMismatch() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "import.txt", "text/plain",
+                "name\nJudo\n".getBytes(StandardCharsets.UTF_8));
+        mockMvc.perform(multipart("/api/admin/imports")
+                        .file(file)
+                        .param("jobType", "DISCIPLINE")
+                        .param("format", "CSV")
+                        .param("mode", "DRY_RUN")
+                        .param("duplicateStrategy", "SKIP")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest());
     }
 }
