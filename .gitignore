@@ -18,3 +18,10 @@ target/
 # Local
 .env
 *.log
+
+# Documents de travail internes — non publiés sur le dépôt distant
+.claude/
+CLAUDE.md
+docs/
+project.md
+prompt.md
