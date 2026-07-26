@@ -40,3 +40,16 @@ management:
     health:
       probes:
         enabled: true
+
+# Sécurité JWT (le secret DOIT être surchargé en production via JWT_SECRET).
+jwt:
+  secret: ${JWT_SECRET:dev-secret-a-remplacer-en-production-0123456789-abcdefghijklmnopqrstuvwxyz}
+  issuer: ${JWT_ISSUER:jodak}
+  access-ttl: ${JWT_ACCESS_TTL:PT15M}
+  refresh-ttl: ${JWT_REFRESH_TTL:P7D}
+
+# Création automatique du premier administrateur (premier démarrage uniquement).
+admin:
+  bootstrap:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
