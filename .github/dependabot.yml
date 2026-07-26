@@ -1,0 +1,26 @@
+version: 2
+
+# Surveille et propose (via PR) les mises à jour des dépendances Maven et des
+# actions GitHub utilisées dans les workflows.
+updates:
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "build"
+    groups:
+      spring:
+        patterns: ["org.springframework*"]
+      testcontainers:
+        patterns: ["org.testcontainers*"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "ci"

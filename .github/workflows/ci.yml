@@ -1,0 +1,114 @@
+name: CI
+
+# Intégration continue : compilation, tests unitaires + intégration (Testcontainers),
+# puis construction et publication de l'image Docker sur GitHub Container Registry (GHCR).
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Annule les exécutions obsolètes d'une même branche/PR.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Compilation + tests (unitaires et d'intégration Testcontainers).
+  # Le runner ubuntu-latest fournit un démon Docker : Testcontainers fonctionne
+  # sans réglage (Ryuk est désactivé via src/test/resources/testcontainers.properties).
+  # ---------------------------------------------------------------------------
+  test:
+    name: Build & tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Installation du JDK 21 (Temurin) + cache Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Compilation, tests unitaires et d'intégration
+        run: mvn -B clean verify
+
+      - name: Publication des rapports de tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapports-tests
+          path: |
+            **/target/surefire-reports/*.xml
+            **/target/failsafe-reports/*.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Publication du jar
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: olympics-platform-jar
+          path: target/*.jar
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Construction et publication de l'image Docker sur GHCR.
+  # Uniquement après des tests verts, et hors pull request (push sur main ou tag).
+  # ---------------------------------------------------------------------------
+  docker:
+    name: Image Docker (GHCR)
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Nom d'image en minuscules (contrainte GHCR)
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Métadonnées (tags et labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Configuration de Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authentification GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construction et publication de l'image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
