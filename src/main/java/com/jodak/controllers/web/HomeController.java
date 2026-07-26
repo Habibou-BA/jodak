@@ -1,27 +1,25 @@
 package com.jodak.controllers.web;
 
 import com.jodak.services.interfaces.DashboardService;
-import com.jodak.services.interfaces.MedalTableService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Page d'accueil (tableau de bord visuel). Réutilise les services applicatifs.
+ * Page d'accueil de la plateforme : présentation des Jeux Olympiques de la Jeunesse de
+ * Dakar 2026. Quelques compteurs en direct proviennent du tableau de bord.
  */
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
 
     private final DashboardService dashboardService;
-    private final MedalTableService medalTableService;
 
     @GetMapping("/")
-    public String index(Model model) {
+    public String home(Model model) {
         model.addAttribute("dashboard", dashboardService.getDashboard());
-        model.addAttribute("medalTable", medalTableService.getMedalTable());
         model.addAttribute("active", "home");
-        return "index";
+        return "home";
     }
 }

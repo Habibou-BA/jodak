@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Dakar 2026 — Jeux Olympiques de la Jeunesse</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <!-- Héros -->
+    <section class="home-hero" data-reveal>
+        <span class="hero-star" aria-hidden="true">★</span>
+
+        <p class="kicker"><span class="star">★</span> Premiers Jeux olympiques en Afrique</p>
+
+        <h1 class="display-xl"><span class="grad-gold">Dakar&nbsp;2026</span></h1>
+        <p class="home-sub">Jeux Olympiques de la Jeunesse · Sénégal</p>
+
+        <p class="date-pill"><span class="star">★</span> 31 octobre&nbsp;→&nbsp;13 novembre 2026 · Dakar · Diamniadio · Saly</p>
+
+        <p class="home-lead">Bienvenue sur la plateforme officielle des données de Dakar 2026&nbsp;: la
+            jeunesse du monde se réunit au Sénégal pour la toute première édition des Jeux
+            olympiques organisée sur le continent africain. Suivez les athlètes, les épreuves et le
+            tableau des médailles en temps réel.</p>
+
+        <div class="hero-actions">
+            <a th:href="@{/dashboard}" class="btn btn-primary">Voir le tableau de bord</a>
+            <a th:href="@{/athletes}" class="btn btn-ghost">Découvrir les athlètes</a>
+        </div>
+
+        <!-- Compte à rebours -->
+        <div class="countdown" id="countdown" data-target="2026-10-31T00:00:00" aria-label="Compte à rebours">
+            <div><span class="num" data-cd="days">--</span><span>Jours</span></div>
+            <div><span class="num" data-cd="hours">--</span><span>Heures</span></div>
+            <div><span class="num" data-cd="mins">--</span><span>Minutes</span></div>
+            <div><span class="num" data-cd="secs">--</span><span>Secondes</span></div>
+        </div>
+    </section>
+
+    <!-- Faits clés -->
+    <section class="facts">
+        <div class="fact" data-reveal><span class="big">2&nbsp;700</span><span class="cap">Athlètes attendus (14–18 ans)</span></div>
+        <div class="fact" data-reveal><span class="big">25</span><span class="cap">Sports au programme</span></div>
+        <div class="fact" data-reveal><span class="big">151</span><span class="cap">Épreuves</span></div>
+        <div class="fact" data-reveal><span class="big">3</span><span class="cap">Villes hôtes</span></div>
+        <div class="fact" data-reveal><span class="big">1<sup>re</sup></span><span class="cap">Édition olympique en Afrique</span></div>
+    </section>
+
+    <!-- À propos -->
+    <section class="panel mt-3" data-reveal>
+        <div class="split">
+            <div>
+                <p class="eyebrow">Un rendez-vous historique</p>
+                <h2 style="font-size:clamp(1.6rem,4vw,2.3rem)">Le sport mondial, pour la première fois en&nbsp;Afrique</h2>
+                <p class="lead" style="margin-top:1rem">Du 31 octobre au 13 novembre 2026, Dakar
+                    accueille la jeunesse olympique du monde entier. Compétition, culture et
+                    éducation se rencontrent pour porter les valeurs de l'Olympisme&nbsp;:
+                    l'excellence, l'amitié et le respect.</p>
+            </div>
+            <ul class="feature-list">
+                <li><span class="mark">★</span><span><strong>Une première historique</strong> — le premier événement olympique organisé sur le sol africain.</span></li>
+                <li><span class="mark">★</span><span><strong>La jeunesse à l'honneur</strong> — 2&nbsp;700 athlètes, à parité femmes-hommes.</span></li>
+                <li><span class="mark">★</span><span><strong>Ouvert à tous</strong> — avec une équipe olympique des réfugiés.</span></li>
+                <li><span class="mark">★</span><span><strong>25 sports</strong> et 151 épreuves à suivre en temps réel.</span></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Villes hôtes -->
+    <section class="mt-3">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Sénégal</p>
+                <h2>Trois villes, un même souffle</h2>
+            </div>
+        </div>
+        <div class="grid cards site-cards" data-reveal>
+            <div class="card site-card"><p class="tag">Capitale</p><h3>Dakar</h3><p class="meta">Cérémonies et cœur battant des Jeux.</p></div>
+            <div class="card site-card"><p class="tag">Ville nouvelle</p><h3>Diamniadio</h3><p class="meta">Infrastructures sportives modernes.</p></div>
+            <div class="card site-card"><p class="tag">Petite-Côte</p><h3>Saly</h3><p class="meta">Épreuves nautiques et de plage.</p></div>
+        </div>
+    </section>
+
+    <!-- Mascotte -->
+    <section class="panel mt-3" data-reveal>
+        <div class="mascot">
+            <div class="emoji" aria-hidden="true">🦁</div>
+            <div>
+                <p class="eyebrow">Mascotte officielle</p>
+                <h2 style="font-size:clamp(1.5rem,4vw,2.1rem)">Ayo, le jeune lion</h2>
+                <p class="lead" style="margin-top:.5rem">Ayo incarne la joie et l'énergie de la
+                    jeunesse sénégalaise — un symbole de fierté, de courage et d'hospitalité,
+                    la « Teranga ».</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- La plateforme en direct -->
+    <section class="mt-3">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Données de la plateforme</p>
+                <h2>Suivez la compétition en direct</h2>
+            </div>
+            <a th:href="@{/dashboard}" class="btn btn-ghost">Tableau de bord</a>
+        </div>
+        <div class="stat-grid">
+            <div class="stat" data-reveal><span class="num" th:text="${dashboard.totalAthletes}">0</span><span class="label">Athlètes enregistrés</span></div>
+            <div class="stat" data-reveal><span class="num" th:text="${dashboard.totalCountries}">0</span><span class="label">Nations</span></div>
+            <div class="stat" data-reveal><span class="num" th:text="${dashboard.totalDisciplines}">0</span><span class="label">Disciplines</span></div>
+            <div class="stat" data-reveal><span class="num" th:text="${dashboard.totalEpreuves}">0</span><span class="label">Épreuves</span></div>
+            <div class="stat" data-reveal><span class="num accent" th:text="${dashboard.totalMedals}">0</span><span class="label">Médailles attribuées</span></div>
+        </div>
+    </section>
+
+    <!-- Appel à l'action -->
+    <section class="panel cta-band mt-3" data-reveal>
+        <p class="eyebrow">Explorez</p>
+        <h2>Toutes les données, une seule plateforme</h2>
+        <p class="lead" style="margin-inline:auto; margin-top:.75rem">Athlètes, disciplines,
+            épreuves, résultats et médailles — via une API REST moderne et un service SOAP.</p>
+        <div class="hero-actions">
+            <a th:href="@{/medailles}" class="btn btn-primary">Tableau des médailles</a>
+            <a th:href="@{/athletes}" class="btn btn-ghost">Athlètes</a>
+            <a th:href="@{/swagger-ui.html}" class="btn btn-ghost" target="_blank" rel="noopener">API · Swagger</a>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>

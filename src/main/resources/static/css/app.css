@@ -683,3 +683,255 @@ tr:first-child .rank.top { background: linear-gradient(140deg, var(--gold-soft),
 
     .nav.open .nav-links a { padding: 0.75rem 1rem; }
 }
+
+/* =============================================================================
+   Page d'accueil — Dakar 2026 (accent or + vert Sénégal, accueillant).
+   ========================================================================== */
+
+:root {
+    --green: #12b76a;
+    --green-deep: #00853f;
+    --sun: #f6b73c;
+}
+
+.home-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 30px;
+    padding: clamp(2.2rem, 6vw, 4.5rem) clamp(1.5rem, 5vw, 4rem);
+    box-shadow: var(--shadow);
+    background:
+        radial-gradient(52rem 32rem at 80% -22%, rgba(246, 183, 60, 0.34), transparent 60%),
+        radial-gradient(46rem 32rem at -6% 120%, rgba(0, 133, 63, 0.26), transparent 55%),
+        linear-gradient(180deg, #131722, #0b0e15);
+}
+
+.home-hero .hero-star {
+    position: absolute;
+    right: clamp(-3rem, -2vw, -1rem);
+    top: clamp(-3rem, -2vw, -1rem);
+    font-size: clamp(9rem, 22vw, 20rem);
+    line-height: 1;
+    color: rgba(18, 183, 106, 0.14);
+    pointer-events: none;
+    user-select: none;
+    transform: rotate(-8deg);
+}
+
+.kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.kicker .star { color: var(--green); }
+
+.display-xl {
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    font-size: clamp(3rem, 11vw, 7rem);
+    margin: 1.2rem 0 0.4rem;
+}
+
+.grad-gold {
+    background: linear-gradient(115deg, var(--gold-soft), var(--gold) 55%, #c98a2e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.home-sub {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.15rem, 3vw, 1.7rem);
+    color: var(--text);
+}
+
+.date-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: rgba(255, 255, 255, 0.03);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    color: var(--text);
+}
+
+.date-pill .star { color: var(--green); }
+
+.home-lead {
+    color: var(--muted);
+    max-width: 60ch;
+    font-size: 1.08rem;
+    margin-top: 1.25rem;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.75rem;
+}
+
+/* ---- Compte à rebours ----------------------------------------------------- */
+
+.countdown {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    max-width: 560px;
+}
+
+.countdown > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 1rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+}
+
+.countdown .num {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 600;
+    color: var(--gold);
+    line-height: 1;
+}
+
+.countdown span:last-child {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+}
+
+.countdown.is-live .num { color: var(--green); }
+
+/* ---- Bandeau de faits ----------------------------------------------------- */
+
+.facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 2.5rem;
+}
+
+.fact {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.4rem 1.35rem;
+    background: linear-gradient(180deg, rgba(27, 31, 43, 0.5), rgba(20, 23, 33, 0.2));
+    transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.fact:hover { transform: translateY(-4px); border-color: var(--gold); }
+
+.fact .big {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 5vw, 2.7rem);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text);
+}
+
+.fact .cap {
+    display: block;
+    margin-top: 0.45rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ---- Sections d'accueil --------------------------------------------------- */
+
+.split {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: center;
+}
+
+.feature-list {
+    list-style: none;
+    display: grid;
+    gap: 0.85rem;
+}
+
+.feature-list li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    color: var(--muted);
+}
+
+.feature-list .mark {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(18, 183, 106, 0.15);
+    color: var(--green);
+    font-size: 0.8rem;
+}
+
+.feature-list strong { color: var(--text); font-weight: 600; }
+
+.site-cards { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+.site-card .tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--green);
+}
+
+.mascot {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.mascot .emoji {
+    font-size: clamp(3rem, 10vw, 5rem);
+    line-height: 1;
+    filter: drop-shadow(0 10px 20px rgba(246, 183, 60, 0.35));
+}
+
+.cta-band {
+    text-align: center;
+    background:
+        radial-gradient(40rem 20rem at 50% -40%, rgba(246, 183, 60, 0.22), transparent 60%),
+        linear-gradient(180deg, rgba(24, 28, 39, 0.6), rgba(18, 21, 30, 0.35));
+}
+
+.cta-band h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+
+.cta-band .hero-actions { justify-content: center; }
+
+@media (max-width: 760px) {
+    .split { grid-template-columns: 1fr; }
+    .countdown { grid-template-columns: repeat(2, 1fr); }
+}

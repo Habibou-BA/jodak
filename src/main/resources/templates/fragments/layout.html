@@ -25,6 +25,7 @@
 
             <ul class="nav-links">
                 <li><a th:href="@{/}" th:classappend="${active == 'home'} ? 'is-active'">Accueil</a></li>
+                <li><a th:href="@{/dashboard}" th:classappend="${active == 'dashboard'} ? 'is-active'">Tableau de bord</a></li>
                 <li><a th:href="@{/disciplines}" th:classappend="${active == 'disciplines'} ? 'is-active'">Disciplines</a></li>
                 <li><a th:href="@{/athletes}" th:classappend="${active == 'athletes'} ? 'is-active'">Athlètes</a></li>
                 <li><a th:href="@{/epreuves}" th:classappend="${active == 'epreuves'} ? 'is-active'">Épreuves</a></li>

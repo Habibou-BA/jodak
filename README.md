@@ -162,7 +162,8 @@ Un site server-side (Thymeleaf) présente les données de façon moderne et resp
 
 | Page | URL | Contenu |
 |---|---|---|
-| Accueil | `/` | Tableau de bord visuel : nation en tête, statistiques, médailles, points |
+| Accueil | `/` | Page d'accueil **Dakar 2026** : présentation du JOJ, compte à rebours, faits clés, mascotte |
+| Tableau de bord | `/dashboard` | Nation en tête, statistiques, médailles, classement par points |
 | Disciplines | `/disciplines` | Grille des disciplines (→ athlètes) |
 | Athlètes | `/athletes` | Recherche multicritère (nom, sexe, discipline), pagination |
 | Épreuves | `/epreuves` | Filtre par discipline, dates |
