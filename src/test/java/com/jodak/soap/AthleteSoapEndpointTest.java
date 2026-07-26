@@ -6,9 +6,9 @@ import com.jodak.dtos.discipline.DisciplineSummary;
 import com.jodak.enums.Gender;
 import com.jodak.services.interfaces.AthleteService;
 import com.jodak.soap.endpoints.AthleteSoapEndpoint;
-import com.jodak.soap.generated.GetAthleteRequest;
-import com.jodak.soap.generated.GetAthleteResponse;
 import com.jodak.soap.mappers.SoapMapper;
+import com.jodak.soap.xml.GetAthleteRequest;
+import com.jodak.soap.xml.GetAthleteResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

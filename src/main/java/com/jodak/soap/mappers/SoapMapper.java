@@ -2,8 +2,8 @@ package com.jodak.soap.mappers;
 
 import com.jodak.dtos.athlete.AthleteResponse;
 import com.jodak.dtos.medaltable.MedalTableRowResponse;
-import com.jodak.soap.generated.Athlete;
-import com.jodak.soap.generated.MedalTableRow;
+import com.jodak.soap.xml.Athlete;
+import com.jodak.soap.xml.MedalTableRow;
 import org.springframework.stereotype.Component;
 
 /**
