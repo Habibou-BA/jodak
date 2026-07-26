@@ -140,10 +140,41 @@
                 </configuration>
             </plugin>
 
+            <!-- Contrôle explicite de la version de Java (message clair si mauvais JDK). -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java-21</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[21,)</version>
+                                    <message>Ce projet requiert Java 21 ou supérieur. Activez-le, par exemple : sdk use java 21-tem</message>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Tests d'intégration (*IT) exécutés par `mvn verify` ; nécessitent Docker (Testcontainers). -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Docker Engine récent (≥ 29) impose une API ≥ 1.40 ; on fixe une version
+                             supportée par le client docker-java pour Testcontainers, afin que
+                             `mvn verify` fonctionne sans réglage manuel. -->
+                        <api.version>1.43</api.version>
+                    </systemPropertyVariables>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

@@ -183,23 +183,19 @@ Exemple d'enveloppe :
 
 Spring Boot Actuator expose la santé : `GET /actuator/health` (utilisée par le healthcheck Docker).
 
-## Tests
-
 - **Unitaires** (JUnit 5 + Mockito) — rapides, sans Docker : `mvn test`
-- **Intégration** (`*IT`, Testcontainers PostgreSQL) — via `mvn verify`
+- **Intégration** (`*IT`, Testcontainers PostgreSQL) — nécessitent Docker : `mvn verify`
 
-### Note macOS / Docker Desktop (Docker Engine ≥ 29)
+`mvn verify` fonctionne avec **Java 21 et un démon Docker démarré**, sans réglage manuel : la
+version d'API Docker (compatibilité Docker Engine ≥ 29) et la désactivation de Ryuk sont déjà
+configurées dans le projet (`maven-failsafe-plugin` et `src/test/resources/testcontainers.properties`).
 
-Le socket Docker par défaut peut être indisponible et Docker 29 impose une API ≥ 1.40. Pour lancer
-les tests d'intégration en local :
+Si Testcontainers ne trouve pas le démon Docker (ex. socket Docker Desktop non standard), indiquez-le :
 
 ```bash
 export DOCKER_HOST="unix://$HOME/Library/Containers/com.docker.docker/Data/docker.raw.sock"
-export TESTCONTAINERS_RYUK_DISABLED=true
-mvn -DargLine="-Dapi.version=1.43" verify
+mvn verify
 ```
-
-En CI (Linux, socket standard), `mvn verify` fonctionne sans ces réglages.
 
 ## Commandes Maven
 
