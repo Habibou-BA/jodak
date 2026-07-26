@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="robots" content="noindex, nofollow"/>
+    <title>Connexion — Administration JODAK</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+</head>
+<body data-login>
+<div class="login-wrap">
+    <form class="login-card" id="login-form">
+        <div class="login-brand">🛡️ JODAK&nbsp;Admin</div>
+        <p class="muted">Console d'administration sécurisée</p>
+        <label>Email
+            <input type="email" name="email" autocomplete="username" required/>
+        </label>
+        <label>Mot de passe
+            <input type="password" name="password" autocomplete="current-password" required/>
+        </label>
+        <button class="btn primary" type="submit">Se connecter</button>
+        <p class="error" data-login-error></p>
+    </form>
+</div>
+<div class="toast" data-toast></div>
+<script th:src="@{/js/admin.js}" defer></script>
+</body>
+</html>
