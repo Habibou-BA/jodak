@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Épreuves — Plateforme JO</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <p class="eyebrow">Compétitions</p>
+    <h1 class="page-title">Épreuves</h1>
+    <p class="lead">Les épreuves par discipline et par date.</p>
+
+    <form class="filters mt-2" method="get" th:action="@{/epreuves}">
+        <div class="field">
+            <label for="disciplineId">Discipline</label>
+            <select id="disciplineId" name="disciplineId">
+                <option value="">Toutes</option>
+                <option th:each="d : ${disciplines}"
+                        th:value="${d.id}"
+                        th:selected="${filterDisciplineId == #strings.toString(d.id)}"
+                        th:text="${d.name}">—</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Filtrer</button>
+        <a th:href="@{/epreuves}" class="btn btn-ghost">Réinitialiser</a>
+    </form>
+
+    <div class="table-wrap" data-reveal th:if="${!page.content.isEmpty()}">
+        <table>
+            <thead>
+            <tr><th>Épreuve</th><th>Discipline</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="e : ${page.content}">
+                <td><strong th:text="${e.label}">Épreuve</strong></td>
+                <td th:text="${e.discipline.name}">Discipline</td>
+                <td><span class="num" th:text="${#temporals.format(e.eventDate, 'dd MMM yyyy')}">date</span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel empty" th:if="${page.content.isEmpty()}">
+        <div class="icon">📅</div>
+        <p>Aucune épreuve enregistrée pour ce filtre.</p>
+    </div>
+
+    <div th:if="${page.totalPages > 1}"
+         th:replace="~{fragments/pagination :: pager(
+            @{/epreuves(page=${page.page - 1}, size=${page.size}, disciplineId=${filterDisciplineId})},
+            @{/epreuves(page=${page.page + 1}, size=${page.size}, disciplineId=${filterDisciplineId})},
+            'Page ' + ${page.page + 1} + ' / ' + ${page.totalPages} + ' · ' + ${page.totalElements} + ' épreuves',
+            ${page.first}, ${page.last})}"></div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:replace="${title}">Plateforme JO</title>
+    <meta name="description" content="Plateforme numérique des Jeux Olympiques — disciplines, athlètes, épreuves, résultats et médailles."/>
+    <link rel="icon"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%85%3C/text%3E%3C/svg%3E"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"/>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container">
+        <nav class="nav" aria-label="Navigation principale">
+            <a th:href="@{/}" class="brand">
+                <span class="rings">JO</span>
+                <span>Plateforme&nbsp;JO</span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a th:href="@{/}" th:classappend="${active == 'home'} ? 'is-active'">Accueil</a></li>
+                <li><a th:href="@{/disciplines}" th:classappend="${active == 'disciplines'} ? 'is-active'">Disciplines</a></li>
+                <li><a th:href="@{/athletes}" th:classappend="${active == 'athletes'} ? 'is-active'">Athlètes</a></li>
+                <li><a th:href="@{/epreuves}" th:classappend="${active == 'epreuves'} ? 'is-active'">Épreuves</a></li>
+                <li><a th:href="@{/medailles}" th:classappend="${active == 'medailles'} ? 'is-active'">Médailles</a></li>
+            </ul>
+
+            <a th:href="@{/swagger-ui.html}" class="nav-cta" target="_blank" rel="noopener">API&nbsp;·&nbsp;Swagger</a>
+
+            <button class="nav-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M4 7h16M4 12h16M4 17h16"/>
+                </svg>
+            </button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+        <div th:replace="${content}">Contenu</div>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="container row">
+        <span>Plateforme JO — API REST &amp; SOAP · Java 21 / Spring Boot 3</span>
+        <span>
+            <a th:href="@{/swagger-ui.html}" target="_blank" rel="noopener">Swagger</a> ·
+            <a th:href="@{/ws/olympics.wsdl}" target="_blank" rel="noopener">WSDL</a> ·
+            <a th:href="@{/actuator/health}" target="_blank" rel="noopener">Santé</a>
+        </span>
+    </div>
+</footer>
+
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>
