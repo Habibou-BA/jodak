@@ -27,6 +27,18 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-olympics}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-olympics}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-olympics}
+      # Amorçage de l'administrateur (repris depuis le fichier .env local ; l'admin
+      # n'est créé qu'au premier démarrage, si la table admin_user est vide).
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Sécurité JWT (à définir en production ; sinon repli sur le défaut de dev).
+      JWT_SECRET: ${JWT_SECRET:-}
+      JWT_ISSUER: ${JWT_ISSUER:-jodak}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-PT15M}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-P7D}
+      # Réinitialisation (désactivée par défaut).
+      ADMIN_RESET_ENABLED: ${ADMIN_RESET_ENABLED:-false}
+      ADMIN_RESET_CONFIRMATION_PHRASE: ${ADMIN_RESET_CONFIRMATION_PHRASE:-REINITIALISER-DAKAR-2026}
     ports:
       - "8080:8080"
     healthcheck:

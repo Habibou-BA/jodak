@@ -1,8 +1,7 @@
 # Plateforme JO — API REST & Web Service SOAP
 
-<!-- Remplacez OWNER/REPO par le chemin de votre dépôt GitHub. -->
-[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/OWNER/REPO/actions/workflows/codeql.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/codeql.yml)
+[![CI](https://github.com/Habibou-BA/jodak/actions/workflows/ci.yml/badge.svg)](https://github.com/Habibou-BA/jodak/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Habibou-BA/jodak/actions/workflows/codeql.yml/badge.svg)](https://github.com/Habibou-BA/jodak/actions/workflows/codeql.yml)
 
 Plateforme numérique centralisée des Jeux Olympiques : gestion des disciplines, athlètes, épreuves
 et résultats, calcul automatique du tableau des médailles et statistiques. Elle expose
@@ -32,7 +31,6 @@ seule** (système d'information historique), au-dessus d'un **socle de services 
 - [Commandes Maven](#commandes-maven)
 - [Organisation des packages](#organisation-des-packages)
 - [Collection Postman](#collection-postman)
-- [Documentation de conception](#documentation-de-conception)
 
 ## Fonctionnalités
 
@@ -65,8 +63,6 @@ flowchart TD
     EXC[GlobalExceptionHandler → ProblemDetail] -. capte .- REST
 ```
 
-Détails et responsabilités par package : [`docs/architecture.md`](docs/architecture.md).
-
 ## Modèle de données
 
 ```mermaid
@@ -85,7 +81,7 @@ erDiagram
 ```
 
 La médaille est **dérivée du rang** (1→OR, 2→ARGENT, 3→BRONZE) et verrouillée en base par un
-`CHECK`. Détails, contraintes et stratégie Flyway : [`docs/data-model.md`](docs/data-model.md).
+`CHECK`. Les contraintes (PK, FK, `CHECK`, `UNIQUE`, index) sont portées par les migrations Flyway.
 
 ## Flux métier — enregistrement d'un résultat
 
@@ -227,7 +223,7 @@ Exemple d'enveloppe :
 
 Module d'administration protégé par **Spring Security 6 + JWT**, exposé en deux temps : une **API
 REST** `/api/admin/**` et une **console web** Thymeleaf isolée `/backoffice` (non référencée depuis
-le site public). Spécification complète : [`docs/admin.md`](docs/admin.md).
+le site public).
 
 **Modèle de sécurité (Option A)** — la lecture reste publique, les écritures et l'administration
 sont protégées :
@@ -286,15 +282,14 @@ Trois workflows GitHub Actions (dossier [`.github`](.github)) :
 **Détails**
 - Le runner `ubuntu-latest` fournit un démon Docker : les tests d'intégration Testcontainers
   s'exécutent sans réglage (Ryuk désactivé via `src/test/resources/testcontainers.properties`).
-- L'image est publiée sur **GitHub Container Registry** : `ghcr.io/<owner>/olympics-platform`,
+- L'image est publiée sur **GitHub Container Registry** : `ghcr.io/habibou-ba/olympics-platform`,
   taguée par branche, version sémantique (`v1.2.3`), SHA court, et `latest` sur `main`. La
   publication utilise le `GITHUB_TOKEN` (permission `packages: write`) — aucun secret à configurer.
-- Récupérer l'image : `docker pull ghcr.io/<owner>/olympics-platform:latest`.
+- Récupérer l'image : `docker pull ghcr.io/habibou-ba/olympics-platform:latest`.
 
 **Mise en route (dépôt public)**
-1. Remplacez `OWNER/REPO` dans les badges ci-dessus par le chemin de votre dépôt.
-2. Poussez le code : le workflow **CI** démarre automatiquement.
-3. Le package GHCR est privé par défaut ; rendez-le public via *Packages → Package settings*
+1. Poussez le code : le workflow **CI** démarre automatiquement.
+2. Le package GHCR est privé par défaut ; rendez-le public via *Packages → Package settings*
    si vous souhaitez un `docker pull` anonyme.
 
 ## Commandes Maven
@@ -325,11 +320,3 @@ sauvegarde, la réinitialisation et le journal. Lancez d'abord **Administration 
 Connexion** : le script de test stocke l'*access token* dans la variable `token`, réutilisée
 automatiquement (auth **Bearer** au niveau de la collection). Renseignez `adminEmail` /
 `adminPassword` dans les variables de la collection.
-
-## Documentation de conception
-
-| Document | Contenu |
-|---|---|
-| [`docs/business-rules.md`](docs/business-rules.md) | Règles métier (RM-xx), décisions (D-xx), validations, mappings |
-| [`docs/architecture.md`](docs/architecture.md) | Architecture en couches, packages, flux |
-| [`docs/data-model.md`](docs/data-model.md) | MCD/MLD, contraintes, stratégie Flyway |
