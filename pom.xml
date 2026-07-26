@@ -61,6 +61,12 @@
             <version>${springdoc.version}</version>
         </dependency>
 
+        <!-- Supervision / health check -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- Base de données PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
