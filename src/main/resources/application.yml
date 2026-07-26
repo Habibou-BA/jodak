@@ -67,6 +67,10 @@ import:
   storage-dir: ${IMPORT_STORAGE_DIR:${java.io.tmpdir}/jodak-imports}
   chunk-size: ${IMPORT_CHUNK_SIZE:500}
   max-concurrent-jobs: ${IMPORT_MAX_CONCURRENT_JOBS:2}
+  # Durcissement des fichiers importés.
+  max-file-size-bytes: ${IMPORT_MAX_FILE_SIZE_BYTES:26214400}          # 25 Mio (fichier téléversé)
+  max-uncompressed-bytes: ${IMPORT_MAX_UNCOMPRESSED_BYTES:209715200}   # 200 Mio (anti « zip bomb » XLSX)
+  min-inflate-ratio: ${IMPORT_MIN_INFLATE_RATIO:0.01}                   # rejette un ratio de décompression > 100x
 
 # Sauvegarde logique (export ZIP).
 backup:
