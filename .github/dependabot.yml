@@ -11,6 +11,12 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "build"
+    ignore:
+      # Spring Boot 4 = migration majeure (Spring Framework 7, Jakarta EE 11, API retirées).
+      # À traiter comme un chantier dédié, pas comme un bump automatique. On conserve les
+      # mises à jour mineures/patch de la branche 3.x.
+      - dependency-name: "org.springframework.boot:spring-boot-starter-parent"
+        update-types: ["version-update:semver-major"]
     groups:
       spring:
         patterns: ["org.springframework*"]
