@@ -65,25 +65,17 @@ secret ni aucune variable**.
 
 ### Si vous ajoutez un déploiement (production)
 
-L'application a besoin, à l'exécution (profil `prod`), des variables ci-dessous — définies sur votre
-**hôte de déploiement** ou, si le déploiement est piloté par un workflow, dans
-_Settings → Secrets and variables → Actions_. Ne mettez **jamais** de valeur sensible dans le code
-ou dans une _Variable_ (utilisez un _Secret_).
+L'application **ne requiert aucune authentification** : les seules variables utiles concernent la
+base de données. Définies sur votre **hôte de déploiement**, ou (déploiement piloté par un workflow)
+dans _Settings → Secrets and variables → Actions_.
 
-| Clé                                                      | Type GitHub conseillé | Rôle                                     |
-| -------------------------------------------------------- | --------------------- | ---------------------------------------- |
-| `SPRING_DATASOURCE_URL`                                  | Variable              | URL JDBC PostgreSQL de production        |
-| `SPRING_DATASOURCE_USERNAME`                             | Variable              | Utilisateur de la base                   |
-| `SPRING_DATASOURCE_PASSWORD`                             | **Secret**            | Mot de passe de la base                  |
-| `JWT_SECRET`                                             | **Secret**            | Clé HMAC des jetons (≥ 64 caractères)    |
-| `JWT_ISSUER`, `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL`        | Variable              | Émetteur et durées de vie des jetons     |
-| `ADMIN_EMAIL`                                            | Variable              | Compte administrateur initial            |
-| `ADMIN_PASSWORD`                                         | **Secret**            | Mot de passe administrateur initial      |
-| `BACKUP_STORAGE_DIR`                                     | Variable              | Répertoire des sauvegardes               |
-| `ADMIN_RESET_ENABLED`, `ADMIN_RESET_CONFIRMATION_PHRASE` | Variable / **Secret** | Réinitialisation (désactivée par défaut) |
+| Clé                          | Type GitHub conseillé | Rôle                              |
+| ---------------------------- | --------------------- | --------------------------------- |
+| `SPRING_DATASOURCE_URL`      | Variable              | URL JDBC PostgreSQL de production |
+| `SPRING_DATASOURCE_USERNAME` | Variable              | Utilisateur de la base            |
+| `SPRING_DATASOURCE_PASSWORD` | **Secret**            | Mot de passe de la base           |
 
-> La liste complète et les valeurs par défaut sont dans [`.env.example`](.env.example).
-> Le fichier `.env` local n'est **jamais** versionné (voir `.gitignore`).
+> Les valeurs par défaut (docker-compose) sont dans [`.env.example`](.env.example).
 
 ---
 
