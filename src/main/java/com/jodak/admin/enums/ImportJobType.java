@@ -8,5 +8,7 @@ public enum ImportJobType {
     DISCIPLINE,
     ATHLETE,
     EPREUVE,
-    RESULTAT
+    RESULTAT,
+    /** Import « système » : un classeur XLSX multi-feuilles chargé en une passe (Nations → Disciplines → Épreuves → Athlètes). */
+    SYSTEME
 }

@@ -18,4 +18,7 @@ public interface AthleteRepository
 
     boolean existsByLastNameIgnoreCaseAndFirstNameIgnoreCaseAndBirthDate(
             String lastName, String firstName, java.time.LocalDate birthDate);
+
+    java.util.Optional<Athlete> findByLastNameIgnoreCaseAndFirstNameIgnoreCaseAndBirthDate(
+            String lastName, String firstName, java.time.LocalDate birthDate);
 }

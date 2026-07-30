@@ -387,6 +387,19 @@ tbody td a:hover { color: var(--gold-soft); }
 .progress { width: 92px; height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; display: inline-block; vertical-align: middle; }
 .progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-soft), var(--gold)); transition: width 0.4s var(--ease); }
 
+/* ---- Étapes (feuilles attendues de l'import) ---- */
+.steps { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.1rem; }
+.step {
+    display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 1rem 0.5rem 0.5rem;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2);
+    font-family: var(--mono); font-size: 0.82rem; letter-spacing: 0.03em;
+}
+.step-num {
+    display: grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%;
+    background: linear-gradient(140deg, var(--gold-soft), var(--gold)); color: var(--gold-ink);
+    font-family: var(--display); font-weight: 700; font-size: 0.9rem;
+}
+
 /* =============================== Toast =============================== */
 .toast {
     position: fixed; left: 50%; bottom: 1.6rem; transform: translateX(-50%) translateY(2rem);

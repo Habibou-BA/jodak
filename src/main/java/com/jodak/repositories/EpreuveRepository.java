@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 /**
  * Accès aux données des épreuves. La recherche multicritère passe par les {@code Specification}.
@@ -17,4 +18,7 @@ public interface EpreuveRepository
 
     boolean existsByLabelIgnoreCaseAndDiscipline_IdAndEventDateAndIdNot(
             String label, Long disciplineId, LocalDate eventDate, Long id);
+
+    Optional<Epreuve> findByLabelIgnoreCaseAndDiscipline_IdAndEventDate(
+            String label, Long disciplineId, LocalDate eventDate);
 }

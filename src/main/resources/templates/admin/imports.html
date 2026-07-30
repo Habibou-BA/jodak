@@ -1,49 +1,60 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{admin/layout :: layout(~{::title}, 'imports', ~{::content})}">
-<head><title>Imports</title></head>
+<head><title>Initialisation</title></head>
 <body>
 <div th:fragment="content">
     <section class="panel">
-        <h2>Nouvel import</h2>
+        <span class="eyebrow">Initialisation du système</span>
+        <h2>Import du fichier de données</h2>
+        <p class="muted">Chargez le <strong>classeur d'initialisation</strong> au format
+            <code>.xlsx</code> : il crée en une seule opération l'ensemble des données du système —
+            nations, disciplines, épreuves, athlètes et résultats. Un modèle prêt à l'emploi est
+            fourni dans le dépôt : <code>sample-imports/initialisation-systeme.xlsx</code>.</p>
+
         <form id="import-form" class="grid-form">
-            <label>Fichier (CSV)
-                <input type="file" name="file" accept=".csv,text/csv" required/>
-            </label>
-            <label>Type
-                <select name="jobType">
-                    <option value="DISCIPLINE">Disciplines</option>
-                    <option value="ATHLETE">Athlètes</option>
-                </select>
+            <label>Classeur d'initialisation (.xlsx)
+                <input type="file" name="file" accept=".xlsx" required/>
             </label>
             <label>Mode
                 <select name="mode">
-                    <option value="DRY_RUN">Simulation (DRY_RUN)</option>
-                    <option value="COMMIT">Import réel (COMMIT)</option>
+                    <option value="COMMIT">Import réel</option>
+                    <option value="DRY_RUN">Simulation (aucune écriture)</option>
                 </select>
             </label>
-            <label>Doublons
+            <label>Données déjà présentes
                 <select name="duplicateStrategy">
                     <option value="SKIP">Ignorer</option>
                     <option value="UPDATE">Mettre à jour</option>
                     <option value="REJECT">Rejeter</option>
                 </select>
             </label>
-            <input type="hidden" name="format" value="CSV"/>
-            <button class="btn primary" type="submit">Lancer l'import</button>
+            <button class="btn primary" type="submit">Lancer l'initialisation</button>
         </form>
     </section>
 
     <section class="panel">
-        <h2>Jobs récents</h2>
+        <h2>Contenu attendu du classeur</h2>
+        <p class="muted">Une feuille par entité, chargées dans l'ordre des dépendances.</p>
+        <div class="steps">
+            <div class="step"><span class="step-num">1</span><span>Nations</span></div>
+            <div class="step"><span class="step-num">2</span><span>Disciplines</span></div>
+            <div class="step"><span class="step-num">3</span><span>Epreuves</span></div>
+            <div class="step"><span class="step-num">4</span><span>Athletes</span></div>
+            <div class="step"><span class="step-num">5</span><span>Resultats</span></div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Imports récents</h2>
         <div class="table-wrap">
             <table>
                 <thead>
-                <tr><th>#</th><th>Type</th><th>Mode</th><th>Statut</th><th>Progression</th>
+                <tr><th>#</th><th>Mode</th><th>Statut</th><th>Progression</th>
                     <th>Importées</th><th>Ignorées</th><th>Échecs</th><th></th></tr>
                 </thead>
                 <tbody data-jobs>
-                <tr><td colspan="9" class="muted">Chargement…</td></tr>
+                <tr><td colspan="8" class="muted">Chargement…</td></tr>
                 </tbody>
             </table>
         </div>

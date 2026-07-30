@@ -149,7 +149,7 @@
                 const page = await res.json();
                 const rows = (page.content || []);
                 tbody.innerHTML = rows.length ? rows.map(renderJob).join("")
-                    : '<tr><td colspan="9" class="muted">Aucun import.</td></tr>';
+                    : '<tr><td colspan="8" class="muted">Aucun import.</td></tr>';
                 if (rows.some((j) => j.status === "PENDING" || j.status === "RUNNING")) {
                     clearTimeout(loadJobs._t);
                     loadJobs._t = setTimeout(loadJobs, 1500);
@@ -161,7 +161,7 @@
             const errLink = j.failedRows > 0
                 ? ` · <a href="#" data-errors="${j.id}">${j.failedRows} erreur(s)</a>` : "";
             return `<tr>
-                <td>${j.id}</td><td>${esc(j.jobType)}</td><td>${esc(j.mode)}</td>
+                <td>${j.id}</td><td>${esc(j.mode)}</td>
                 <td><span class="badge ${esc(j.status)}">${esc(j.status)}</span></td>
                 <td><span class="progress"><span style="width:${j.progressPercent}%"></span></span> ${j.progressPercent}%</td>
                 <td>${j.importedRows}</td><td>${j.skippedRows}</td>
