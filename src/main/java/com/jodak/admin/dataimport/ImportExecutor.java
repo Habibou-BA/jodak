@@ -148,7 +148,8 @@ public class ImportExecutor {
             new SheetPlan("Nations", ImportJobType.COUNTRY),
             new SheetPlan("Disciplines", ImportJobType.DISCIPLINE),
             new SheetPlan("Epreuves", ImportJobType.EPREUVE),
-            new SheetPlan("Athletes", ImportJobType.ATHLETE));
+            new SheetPlan("Athletes", ImportJobType.ATHLETE),
+            new SheetPlan("Resultats", ImportJobType.RESULTAT));
 
     private record SheetPlan(String sheet, ImportJobType type) {
     }

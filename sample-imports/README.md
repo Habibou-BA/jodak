@@ -19,6 +19,11 @@ opération. Il contient une feuille par entité, chargée dans l'ordre des dépe
 | `Disciplines` | Programme sportif | `name` |
 | `Epreuves` | Épreuves datées (fenêtre des Jeux) | `label`, `discipline`, `date` |
 | `Athletes` | Jeu d'athlètes **fictifs** représentatifs | `lastName`, `firstName`, `gender`, `birthDate`, `countryCode`, `discipline`, `heightCm`, `weightKg` |
+| `Resultats` | Podiums de démonstration (médaille dérivée du rang) | `epreuveLabel`, `discipline`, `date`, `athleteLastName`, `athleteFirstName`, `athleteBirthDate`, `rank` |
+
+Les feuilles sont chargées dans l'ordre des dépendances (une nation avant un athlète, une épreuve
+et un athlète avant un résultat). Chaque résultat référence une épreuve (libellé + discipline +
+date) et un athlète (nom + prénom + date de naissance) déjà présents.
 
 Import en une passe (type `SYSTEME`) :
 ```

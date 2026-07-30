@@ -277,6 +277,7 @@ class ImportIT {
         assertThat(countryRepository.count()).isEqualTo(206);
         assertThat(disciplineRepository.count()).isEqualTo(32);
         assertThat(epreuveRepository.count()).isEqualTo(86);
-        assertThat(athleteRepository.count()).isEqualTo(40);
+        assertThat(athleteRepository.count()).isEqualTo(47);
+        assertThat(resultatRepository.count()).isEqualTo(42);
     }
 }
