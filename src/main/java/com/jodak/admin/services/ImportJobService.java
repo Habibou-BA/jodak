@@ -3,7 +3,6 @@ package com.jodak.admin.services;
 import com.jodak.admin.dataimport.ImportExecutor;
 import com.jodak.admin.dataimport.ImportFileStorage;
 import com.jodak.admin.dataimport.ImportFileValidator;
-import com.jodak.admin.dataimport.RowImporterRegistry;
 import com.jodak.admin.dtos.ImportErrorResponse;
 import com.jodak.admin.dtos.ImportJobResponse;
 import com.jodak.admin.entities.ImportJob;
@@ -13,7 +12,6 @@ import com.jodak.admin.enums.ImportFormat;
 import com.jodak.admin.enums.ImportJobType;
 import com.jodak.admin.enums.ImportMode;
 import com.jodak.admin.enums.ImportStatus;
-import com.jodak.admin.exceptions.ImportValidationException;
 import com.jodak.admin.mappers.ImportJobMapper;
 import com.jodak.admin.repositories.ImportJobErrorRepository;
 import com.jodak.admin.repositories.ImportJobRecordRepository;
@@ -22,7 +20,10 @@ import com.jodak.dtos.common.PageResponse;
 import com.jodak.exceptions.ConflictException;
 import com.jodak.exceptions.ResourceNotFoundException;
 import com.jodak.repositories.AthleteRepository;
+import com.jodak.repositories.CountryRepository;
 import com.jodak.repositories.DisciplineRepository;
+import com.jodak.repositories.EpreuveRepository;
+import com.jodak.repositories.ResultatRepository;
 import com.jodak.utils.PageResponseFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,32 +50,32 @@ public class ImportJobService {
     private final ImportJobRecordRepository importJobRecordRepository;
     private final ImportFileStorage importFileStorage;
     private final ImportFileValidator importFileValidator;
-    private final RowImporterRegistry importerRegistry;
     private final ImportExecutor importExecutor;
     private final ImportJobMapper mapper;
-    private final AthleteRepository athleteRepository;
+    private final CountryRepository countryRepository;
     private final DisciplineRepository disciplineRepository;
+    private final EpreuveRepository epreuveRepository;
+    private final AthleteRepository athleteRepository;
+    private final ResultatRepository resultatRepository;
 
-    public ImportJobResponse create(MultipartFile file, ImportJobType jobType, ImportFormat format,
-                                    ImportMode mode, DuplicateStrategy strategy, Long adminId) {
-        if (jobType == ImportJobType.SYSTEME) {
-            if (format != ImportFormat.XLSX) {
-                throw new ImportValidationException(
-                        "L'import « système » nécessite un classeur XLSX multi-feuilles.");
-            }
-        } else if (!importerRegistry.supports(jobType)) {
-            throw new ImportValidationException("Type d'import non pris en charge : " + jobType);
-        }
-        importFileValidator.validate(file, format);
+    /**
+     * Crée un import « système » (unique format pris en charge) : un classeur XLSX multi-feuilles
+     * qui initialise l'ensemble des données (nations, disciplines, épreuves, athlètes, résultats).
+     */
+    public ImportJobResponse create(MultipartFile file, ImportMode mode, DuplicateStrategy strategy,
+                                    Long adminId) {
+        importFileValidator.validate(file);
         ImportFileStorage.StoredFile stored = importFileStorage.store(file);
-        if (importJobRepository.existsByContentHashAndJobTypeAndStatusIn(stored.hash(), jobType,
-                List.of(ImportStatus.PENDING, ImportStatus.RUNNING))) {
+        if (importJobRepository.existsByContentHashAndJobTypeAndStatusIn(stored.hash(),
+                ImportJobType.SYSTEME, List.of(ImportStatus.PENDING, ImportStatus.RUNNING))) {
             throw new ConflictException("Un import identique est déjà en attente ou en cours.");
         }
         ImportJob job = importJobRepository.save(ImportJob.builder()
-                .jobType(jobType).format(format).mode(mode).duplicateStrategy(strategy)
+                .jobType(ImportJobType.SYSTEME).format(ImportFormat.XLSX)
+                .mode(mode).duplicateStrategy(strategy)
                 .status(ImportStatus.PENDING)
-                .sourceFileName(file.getOriginalFilename() == null ? "import" : file.getOriginalFilename())
+                .sourceFileName(file.getOriginalFilename() == null ? "initialisation.xlsx"
+                        : file.getOriginalFilename())
                 .storedFilePath(stored.path().toString())
                 .fileSize(stored.size()).contentHash(stored.hash())
                 .correlationId(UUID.randomUUID().toString())
@@ -82,7 +83,7 @@ public class ImportJobService {
                 .build());
 
         importExecutor.run(job.getId()); // exécution asynchrone
-        log.info("Import job {} créé (type={}, mode={})", job.getId(), jobType, mode);
+        log.info("Import système {} créé (mode={})", job.getId(), mode);
         return mapper.toResponse(job);
     }
 
@@ -130,8 +131,11 @@ public class ImportJobService {
         for (ImportJobRecord record : records) {
             if ("INSERT".equals(record.getOperation())) {
                 switch (record.getEntityType()) {
+                    case "RESULTAT" -> resultatRepository.deleteById(record.getEntityId());
                     case "ATHLETE" -> athleteRepository.deleteById(record.getEntityId());
+                    case "EPREUVE" -> epreuveRepository.deleteById(record.getEntityId());
                     case "DISCIPLINE" -> disciplineRepository.deleteById(record.getEntityId());
+                    case "COUNTRY" -> countryRepository.deleteById(record.getEntityId());
                     default -> log.warn("Type non compensable : {}", record.getEntityType());
                 }
             }

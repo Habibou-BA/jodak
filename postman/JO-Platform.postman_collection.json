@@ -1080,7 +1080,7 @@
           "name": "Imports",
           "item": [
             {
-              "name": "Lancer un import (CSV ou XLSX)",
+              "name": "Lancer l'initialisation du système (XLSX)",
               "request": {
                 "method": "POST",
                 "header": [],
@@ -1091,25 +1091,13 @@
                       "key": "file",
                       "type": "file",
                       "src": [],
-                      "description": "Fichier .csv ou .xlsx (voir sample-imports/)"
-                    },
-                    {
-                      "key": "jobType",
-                      "value": "DISCIPLINE",
-                      "type": "text",
-                      "description": "DISCIPLINE | ATHLETE"
-                    },
-                    {
-                      "key": "format",
-                      "value": "CSV",
-                      "type": "text",
-                      "description": "CSV | XLSX"
+                      "description": "Le classeur d'initialisation .xlsx (sample-imports/initialisation-systeme.xlsx)"
                     },
                     {
                       "key": "mode",
-                      "value": "DRY_RUN",
+                      "value": "COMMIT",
                       "type": "text",
-                      "description": "DRY_RUN (validation) | COMMIT (import réel)"
+                      "description": "COMMIT (import réel) | DRY_RUN (simulation)"
                     },
                     {
                       "key": "duplicateStrategy",
@@ -1130,7 +1118,7 @@
                     "imports"
                   ]
                 },
-                "description": "Dépose un fichier et démarre un job d'import **asynchrone**. Le job id renvoyé est stocké dans `importJobId`. Réponses : 201 (job créé), 400 (fichier/format invalide, extension incohérente), 409 (import identique déjà en cours)."
+                "description": "Charge le **fichier d'initialisation du système** (classeur XLSX multi-feuilles : Nations, Disciplines, Epreuves, Athletes, Resultats) en une seule opération asynchrone. C'est le seul format d'import pris en charge. Le job id renvoyé est stocké dans `importJobId`. Réponses : 201, 400 (fichier non .xlsx / invalide), 409 (import identique déjà en cours)."
               },
               "event": [
                 {
@@ -1271,7 +1259,8 @@
                 "description": "Supprime les enregistrements insérés par un import COMMIT terminé (compensation). Réponses : 200."
               }
             }
-          ]
+          ],
+          "description": "Initialisation du système via un unique classeur XLSX (import « système »). Lancez l'import, puis suivez sa progression / ses erreurs, annulez ou compensez si besoin."
         },
         {
           "name": "Maintenance",

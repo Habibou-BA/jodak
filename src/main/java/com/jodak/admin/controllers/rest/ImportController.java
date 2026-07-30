@@ -3,8 +3,6 @@ package com.jodak.admin.controllers.rest;
 import com.jodak.admin.dtos.ImportErrorResponse;
 import com.jodak.admin.dtos.ImportJobResponse;
 import com.jodak.admin.enums.DuplicateStrategy;
-import com.jodak.admin.enums.ImportFormat;
-import com.jodak.admin.enums.ImportJobType;
 import com.jodak.admin.enums.ImportMode;
 import com.jodak.admin.enums.ImportStatus;
 import com.jodak.admin.services.ImportJobService;
@@ -44,15 +42,13 @@ public class ImportController {
     private final ImportJobService importJobService;
 
     @PostMapping
-    @Operation(summary = "Lancer un import (asynchrone)")
+    @Operation(summary = "Lancer l'import du fichier d'initialisation du système (asynchrone)")
     public ResponseEntity<ImportJobResponse> create(
             @RequestParam("file") MultipartFile file,
-            @RequestParam ImportJobType jobType,
-            @RequestParam(defaultValue = "CSV") ImportFormat format,
             @RequestParam(defaultValue = "DRY_RUN") ImportMode mode,
             @RequestParam(defaultValue = "SKIP") DuplicateStrategy duplicateStrategy,
             @AuthenticationPrincipal String adminId) {
-        ImportJobResponse job = importJobService.create(file, jobType, format, mode, duplicateStrategy,
+        ImportJobResponse job = importJobService.create(file, mode, duplicateStrategy,
                 Long.valueOf(adminId));
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(job.id()).toUri();

@@ -51,51 +51,8 @@ public class ImportExecutor {
         MDC.put("correlationId", job.getCorrelationId());
         long start = System.currentTimeMillis();
         try {
-            if (job.getJobType() == ImportJobType.SYSTEME) {
-                runSystem(job, start);
-                return;
-            }
-            RowImporter importer = registry.forType(job.getJobType());
-            Path path = Path.of(job.getStoredFilePath());
-
-            long total;
-            try (RowReader reader = readerFactory.open(path, job.getFormat())) {
-                List<String> missing = missingColumns(importer.requiredColumns(), reader.headers());
-                if (!missing.isEmpty()) {
-                    fail(jobId, "Colonnes manquantes : " + String.join(", ", missing), start);
-                    return;
-                }
-                total = count(reader);
-            }
-            importJobRepository.markRunning(jobId, total, OffsetDateTime.now());
-
-            Counters c = new Counters();
-            int chunk = Math.max(1, properties.chunkSize());
-            long sinceUpdate = 0;
-
-            try (RowReader reader = readerFactory.open(path, job.getFormat())) {
-                for (RowData row : reader) {
-                    if (sinceUpdate == 0 && Boolean.TRUE.equals(importJobRepository.isCancelRequested(jobId))) {
-                        importJobRepository.finish(jobId, ImportStatus.CANCELLED, c.processed, c.imported,
-                                c.updated, c.skipped, c.failed, percent(c.processed, total),
-                                OffsetDateTime.now(), System.currentTimeMillis() - start);
-                        log.info("Import job {} annulé après {} lignes", jobId, c.processed);
-                        return;
-                    }
-                    apply(jobId, importer, row, job, c, null);
-                    c.processed++;
-                    if (++sinceUpdate >= chunk) {
-                        importJobRepository.saveProgress(jobId, c.processed, c.imported, c.updated,
-                                c.skipped, c.failed, percent(c.processed, total));
-                        sinceUpdate = 0;
-                    }
-                }
-            }
-
-            importJobRepository.finish(jobId, ImportStatus.COMPLETED, c.processed, c.imported, c.updated,
-                    c.skipped, c.failed, 100, OffsetDateTime.now(), System.currentTimeMillis() - start);
-            log.info("Import job {} terminé : {} importées, {} ignorées, {} en échec",
-                    jobId, c.imported, c.skipped, c.failed);
+            // L'unique format d'import pris en charge est le classeur système multi-feuilles.
+            runSystem(job, start);
         } catch (Exception ex) {
             log.error("Import job {} en échec", jobId, ex);
             fail(jobId, truncate(ex.getMessage()), start);

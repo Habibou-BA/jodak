@@ -44,7 +44,7 @@ seule** (système d'information historique), au-dessus d'un **socle de services 
 | **Tableau des médailles** | `GET /tableau-medailles` | Classement or→argent→bronze (départage A→Z) |
 | **Tableau de bord** | `GET /tableau-de-bord` (+ `/classement-points`) | Compteurs + points (Or=7, Argent=4, Bronze=1) |
 | **SOAP** | `GetAthlete`, `GetMedalTable` | Lecture seule (SI historique), contrat XSD/WSDL |
-| **Administration** | `/api/admin/**` + console `/backoffice` | JWT, import async CSV/XLSX, export/sauvegarde/réinitialisation, journal |
+| **Administration** | `/api/admin/**` + console `/backoffice` | JWT, import du fichier d'initialisation (XLSX), export/sauvegarde/réinitialisation, journal |
 
 ## Architecture
 
@@ -240,13 +240,13 @@ Le jeton se transmet via l'en-tête `Authorization: Bearer <token>`.
 | Domaine | Endpoints | Détails |
 |---|---|---|
 | **Authentification** | `POST /api/admin/auth/{login,refresh,logout}` | JWT, rotation, verrouillage |
-| **Import asynchrone** | `POST /api/admin/imports` · `GET .../{id}` · `.../{id}/errors` · `.../{id}/cancel` · `.../{id}/rollback` | **CSV & XLSX**, DRY_RUN/COMMIT, progression, annulation, compensation, rapport d'erreurs |
+| **Import système** | `POST /api/admin/imports` · `GET .../{id}` · `.../{id}/errors` · `.../{id}/cancel` · `.../{id}/rollback` | **Fichier d'initialisation XLSX** (Nations, Disciplines, Épreuves, Athlètes, Résultats) chargé en une passe ; DRY_RUN/COMMIT, progression, annulation, compensation, rapport d'erreurs |
 | **Export** | `GET /api/admin/export` | Archive ZIP (CSV par domaine + `metadata.json`, empreintes SHA-256) |
 | **Sauvegarde** | `POST /api/admin/backup` · `GET .../{fileName}/download` | Sauvegarde logique côté serveur |
 | **Réinitialisation** | `POST /api/admin/reset` | Destructif, **désactivé par défaut**, double confirmation (mot de passe + phrase), sauvegarde préalable |
 | **Journal** | `GET /api/admin/logs` | Audit des actions d'administration |
 
-**Durcissement des imports** : taille bornée, cohérence extension ↔ format, et pour les `.xlsx`
+**Durcissement des imports** : taille bornée, extension `.xlsx` requise, et pour ces classeurs
 (archives ZIP lues par Apache POI) protections **anti « zip bomb »** (ratio et taille de
 décompression bornés), **XXE** (entités externes XML désactivées) et **zip slip** (aucune extraction
 disque) — voir `PoiSecurityConfig` et `ImportFileValidator`. Fichiers d'exemple : `sample-imports/`.
@@ -315,8 +315,8 @@ soap/{endpoints,mappers,generated} · specifications · utils · validators
 Athlètes, Épreuves, Résultats, Tableau des médailles, Tableau de bord, SOAP, **Administration**).
 Variable `baseUrl`.
 
-Le dossier **Administration** couvre l'authentification, l'import (CSV/XLSX), l'export, la
-sauvegarde, la réinitialisation et le journal. Lancez d'abord **Administration › Authentification ›
+Le dossier **Administration** couvre l'authentification, l'import du fichier d'initialisation,
+l'export, la sauvegarde, la réinitialisation et le journal. Lancez d'abord **Administration › Authentification ›
 Connexion** : le script de test stocke l'*access token* dans la variable `token`, réutilisée
 automatiquement (auth **Bearer** au niveau de la collection). Renseignez `adminEmail` /
 `adminPassword` dans les variables de la collection.

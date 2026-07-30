@@ -1,17 +1,13 @@
-# Fichiers d'exemple d'import
+# Fichier d'initialisation du système
 
-Ces fichiers permettent de tester l'import asynchrone. Deux formats sont pris en charge :
-**CSV** et **XLSX** (Apache POI). Un `.xlsx` reprend les **mêmes colonnes** que le CSV (première
-ligne = en-tête, première feuille utilisée).
+L'administration importe un **unique fichier** qui initialise l'ensemble des données du système :
+**`initialisation-systeme.xlsx`**, un classeur `.xlsx` avec **une feuille par entité**, chargées en
+une passe dans l'ordre des dépendances.
 
-Le fichier téléversé est durci contre les archives malveillantes : taille bornée (25 Mio),
-cohérence extension/format vérifiée, et pour les `.xlsx` protection anti « zip bomb » / XXE
-(décompression bornée, entités externes XML désactivées).
+Le fichier est durci contre les archives malveillantes : taille bornée (25 Mio), extension `.xlsx`
+requise, protections anti « zip bomb » / XXE (décompression bornée, entités externes désactivées).
 
-## Initialisation complète du système (un seul fichier)
-
-**`initialisation-systeme.xlsx`** est un **classeur unique** qui initialise un système vide en une
-opération. Il contient une feuille par entité, chargée dans l'ordre des dépendances :
+## Feuilles du classeur
 
 | Feuille | Contenu | Colonnes |
 |---|---|---|
@@ -21,62 +17,33 @@ opération. Il contient une feuille par entité, chargée dans l'ordre des dépe
 | `Athletes` | Jeu d'athlètes **fictifs** représentatifs | `lastName`, `firstName`, `gender`, `birthDate`, `countryCode`, `discipline`, `heightCm`, `weightKg` |
 | `Resultats` | Podiums de démonstration (médaille dérivée du rang) | `epreuveLabel`, `discipline`, `date`, `athleteLastName`, `athleteFirstName`, `athleteBirthDate`, `rank` |
 
-Les feuilles sont chargées dans l'ordre des dépendances (une nation avant un athlète, une épreuve
-et un athlète avant un résultat). Chaque résultat référence une épreuve (libellé + discipline +
-date) et un athlète (nom + prénom + date de naissance) déjà présents.
+Chaque `Athlete` référence une nation (`countryCode`) et une discipline existantes ; chaque
+`Resultat` référence une épreuve (libellé + discipline + date) et un athlète (nom + prénom +
+naissance) déjà présents. Les données source, éditables, sont dans `init/*.csv` (une par entité) —
+le classeur en est la compilation.
 
-Import en une passe (type `SYSTEME`) :
-```
-POST /api/admin/imports   file=initialisation-systeme.xlsx  jobType=SYSTEME  format=XLSX  mode=COMMIT  duplicateStrategy=SKIP
-```
-ou, depuis la console, **Imports → Type « Système complet » + Format XLSX**. Les nations déjà
-présentes (référentiel Flyway) sont ignorées (`SKIP`). Les données source, éditables, sont dans
-`sample-imports/init/*.csv` (une par entité).
-
-## Endpoint
+## Import
 
 ```
 POST /api/admin/imports        (multipart, ROLE_ADMIN)
-  file               : le fichier CSV ou XLSX
-  jobType            : DISCIPLINE | ATHLETE
-  format             : CSV | XLSX
-  mode               : DRY_RUN (validation seule) | COMMIT (import réel)
-  duplicateStrategy  : SKIP | UPDATE | REJECT
+  file               : initialisation-systeme.xlsx (seul format accepté : .xlsx)
+  mode               : COMMIT (import réel) | DRY_RUN (simulation, aucune écriture)
+  duplicateStrategy  : SKIP (ignorer les existants) | UPDATE | REJECT
 ```
+ou, depuis la console : **Imports → Lancer l'initialisation**.
 
 Suivi : `GET /api/admin/imports/{id}` (progression, compteurs) ·
 rapport d'erreurs : `GET /api/admin/imports/{id}/errors` ·
 annulation : `POST /api/admin/imports/{id}/cancel` ·
 compensation : `POST /api/admin/imports/{id}/rollback`.
 
-## Disciplines — colonnes
+## Règles de validation (par feuille)
 
-| Colonne | Obligatoire | Règle |
-|---|---|---|
-| `name` | oui | Nom unique (insensible à la casse) |
-
-## Athlètes — colonnes
-
-| Colonne | Obligatoire | Règle |
-|---|---|---|
-| `lastName` | oui | Non vide |
-| `firstName` | oui | Non vide |
-| `gender` | oui | `Homme`/`Femme` (ou Male/Female, M/F) → normalisé en MALE/FEMALE |
-| `birthDate` | oui | `AAAA-MM-JJ` ou `JJ/MM/AAAA`, dans le passé |
-| `countryCode` | oui | Code d'une nation **existante** (ex. FRA, USA, JAM) |
-| `discipline` | oui | Nom d'une discipline **existante** |
-| `heightCm` | oui | Entier 100–260 |
-| `weightKg` | oui | Entier 30–250 |
-
-> Les nations sont fournies par le référentiel (migration `V2`). Importez d'abord les **disciplines**,
-> puis les **athlètes**.
-
-## Fichiers fournis
-
-| Fichier | Cas testé |
-|---|---|
-| `disciplines-valid.csv` | Import valide de disciplines |
-| `athletes-valid.csv` | Import valide d'athlètes |
-| `athletes-duplicates.csv` | Doublons (selon `duplicateStrategy`) |
-| `athletes-invalid.csv` | Erreurs de validation (colonnes/valeurs) et références inconnues |
-| `empty-file.csv` | Fichier sans donnée (en-tête seul) |
+- **Nations** — `code` : 3 lettres majuscules (CIO), unique ; `name` : unique.
+- **Disciplines** — `name` : unique (insensible à la casse).
+- **Epreuves** — `discipline` existante ; `date` `AAAA-MM-JJ` ou `JJ/MM/AAAA` ; unique (libellé,
+  discipline, date).
+- **Athletes** — `gender` `Homme`/`Femme` ; `birthDate` passée ; `heightCm` 100–260 ; `weightKg`
+  30–250 ; `countryCode` et `discipline` existants ; unique (nom, prénom, naissance).
+- **Resultats** — `rank` ≥ 1 (médaille : 1→or, 2→argent, 3→bronze) ; un seul athlète par rang et un
+  seul résultat par athlète dans une épreuve.
