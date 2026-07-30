@@ -11,6 +11,7 @@ import com.jodak.admin.repositories.ImportJobRepository;
 import com.jodak.admin.repositories.RefreshTokenRepository;
 import com.jodak.entities.Discipline;
 import com.jodak.repositories.AthleteRepository;
+import com.jodak.repositories.CountryRepository;
 import com.jodak.repositories.DisciplineRepository;
 import com.jodak.repositories.EpreuveRepository;
 import com.jodak.repositories.ResultatRepository;
@@ -32,6 +33,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,6 +81,8 @@ class ImportIT {
     private ImportJobRecordRepository importJobRecordRepository;
     @Autowired
     private DisciplineRepository disciplineRepository;
+    @Autowired
+    private CountryRepository countryRepository;
     @Autowired
     private AthleteRepository athleteRepository;
     @Autowired
@@ -244,5 +249,34 @@ class ImportIT {
                         .param("duplicateStrategy", "SKIP")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Import « système » : le classeur multi-feuilles initialise un système vide")
+    void systemeImportInitialisesEmptySystem() throws Exception {
+        // Partir d'un système réellement vide (on retire aussi les nations du référentiel V2).
+        countryRepository.deleteAll();
+
+        byte[] content = Files.readAllBytes(Path.of("sample-imports/initialisation-systeme.xlsx"));
+        MockMultipartFile file = new MockMultipartFile("file", "initialisation-systeme.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", content);
+        String body = mockMvc.perform(multipart("/api/admin/imports")
+                        .file(file)
+                        .param("jobType", "SYSTEME")
+                        .param("format", "XLSX")
+                        .param("mode", "COMMIT")
+                        .param("duplicateStrategy", "SKIP")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        long jobId = objectMapper.readTree(body).get("id").asLong();
+
+        JsonNode job = awaitTerminal(jobId);
+        assertThat(job.get("status").asText()).isEqualTo("COMPLETED");
+        assertThat(job.get("failedRows").asLong()).isZero();
+        assertThat(countryRepository.count()).isEqualTo(206);
+        assertThat(disciplineRepository.count()).isEqualTo(32);
+        assertThat(epreuveRepository.count()).isEqualTo(86);
+        assertThat(athleteRepository.count()).isEqualTo(40);
     }
 }

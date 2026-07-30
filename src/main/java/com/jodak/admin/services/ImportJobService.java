@@ -57,7 +57,12 @@ public class ImportJobService {
 
     public ImportJobResponse create(MultipartFile file, ImportJobType jobType, ImportFormat format,
                                     ImportMode mode, DuplicateStrategy strategy, Long adminId) {
-        if (!importerRegistry.supports(jobType)) {
+        if (jobType == ImportJobType.SYSTEME) {
+            if (format != ImportFormat.XLSX) {
+                throw new ImportValidationException(
+                        "L'import « système » nécessite un classeur XLSX multi-feuilles.");
+            }
+        } else if (!importerRegistry.supports(jobType)) {
             throw new ImportValidationException("Type d'import non pris en charge : " + jobType);
         }
         importFileValidator.validate(file, format);

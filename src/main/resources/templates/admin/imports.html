@@ -7,13 +7,22 @@
     <section class="panel">
         <h2>Nouvel import</h2>
         <form id="import-form" class="grid-form">
-            <label>Fichier (CSV)
-                <input type="file" name="file" accept=".csv,text/csv" required/>
+            <label>Fichier (CSV ou XLSX)
+                <input type="file" name="file" accept=".csv,.xlsx" required/>
             </label>
             <label>Type
                 <select name="jobType">
+                    <option value="SYSTEME">Système complet (classeur XLSX)</option>
+                    <option value="COUNTRY">Nations</option>
                     <option value="DISCIPLINE">Disciplines</option>
+                    <option value="EPREUVE">Épreuves</option>
                     <option value="ATHLETE">Athlètes</option>
+                </select>
+            </label>
+            <label>Format
+                <select name="format">
+                    <option value="CSV">CSV</option>
+                    <option value="XLSX">XLSX</option>
                 </select>
             </label>
             <label>Mode
@@ -29,9 +38,11 @@
                     <option value="REJECT">Rejeter</option>
                 </select>
             </label>
-            <input type="hidden" name="format" value="CSV"/>
             <button class="btn primary" type="submit">Lancer l'import</button>
         </form>
+        <p class="muted">Import « système » : un classeur XLSX avec les feuilles
+            <code>Nations</code>, <code>Disciplines</code>, <code>Epreuves</code>, <code>Athletes</code>,
+            chargées en une passe (voir <code>sample-imports/initialisation-systeme.xlsx</code>).</p>
     </section>
 
     <section class="panel">

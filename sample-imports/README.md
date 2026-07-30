@@ -8,6 +8,26 @@ Le fichier téléversé est durci contre les archives malveillantes : taille bor
 cohérence extension/format vérifiée, et pour les `.xlsx` protection anti « zip bomb » / XXE
 (décompression bornée, entités externes XML désactivées).
 
+## Initialisation complète du système (un seul fichier)
+
+**`initialisation-systeme.xlsx`** est un **classeur unique** qui initialise un système vide en une
+opération. Il contient une feuille par entité, chargée dans l'ordre des dépendances :
+
+| Feuille | Contenu | Colonnes |
+|---|---|---|
+| `Nations` | **206 CNO** (tous les pays concernés par les JOJ) | `code`, `name` |
+| `Disciplines` | Programme sportif | `name` |
+| `Epreuves` | Épreuves datées (fenêtre des Jeux) | `label`, `discipline`, `date` |
+| `Athletes` | Jeu d'athlètes **fictifs** représentatifs | `lastName`, `firstName`, `gender`, `birthDate`, `countryCode`, `discipline`, `heightCm`, `weightKg` |
+
+Import en une passe (type `SYSTEME`) :
+```
+POST /api/admin/imports   file=initialisation-systeme.xlsx  jobType=SYSTEME  format=XLSX  mode=COMMIT  duplicateStrategy=SKIP
+```
+ou, depuis la console, **Imports → Type « Système complet » + Format XLSX**. Les nations déjà
+présentes (référentiel Flyway) sont ignorées (`SKIP`). Les données source, éditables, sont dans
+`sample-imports/init/*.csv` (une par entité).
+
 ## Endpoint
 
 ```

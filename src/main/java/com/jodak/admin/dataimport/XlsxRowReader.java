@@ -19,12 +19,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * Lecteur XLSX (Apache POI) : la première feuille sert de source, sa première ligne d'en-tête.
+ * Lecteur XLSX (Apache POI) : la première ligne d'une feuille sert d'en-tête. Par défaut la
+ * première feuille est utilisée ; un constructeur permet de cibler une feuille par son nom
+ * (import « système » multi-feuilles).
  *
  * <p>Le durcissement anti « zip bomb » / XXE est appliqué globalement par {@link PoiSecurityConfig}.
- * Les tailles de fichier étant bornées en amont (25 Mio), le classeur est chargé via l'API
- * {@code usermodel} ; les lignes entièrement vides sont ignorées et les dates sont normalisées en
- * ISO (comme les CSV).</p>
+ * Les lignes entièrement vides sont ignorées et les dates sont normalisées en ISO (comme les CSV).</p>
  */
 public class XlsxRowReader implements RowReader {
 
@@ -33,7 +33,15 @@ public class XlsxRowReader implements RowReader {
     private final List<String> headers;
     private final Iterator<Row> rowIterator;
 
+    /** Lit la première feuille. */
     public XlsxRowReader(Path path) throws IOException {
+        this(path, null);
+    }
+
+    /**
+     * Lit la feuille nommée {@code sheetName} (insensible à la casse) ; {@code null} = première feuille.
+     */
+    public XlsxRowReader(Path path, String sheetName) throws IOException {
         InputStream in = Files.newInputStream(path);
         try {
             this.workbook = new XSSFWorkbook(in);
@@ -43,7 +51,11 @@ public class XlsxRowReader implements RowReader {
         }
         in.close();
 
-        Sheet sheet = workbook.getSheetAt(0);
+        Sheet sheet = (sheetName == null) ? workbook.getSheetAt(0) : findSheet(workbook, sheetName);
+        if (sheet == null) {
+            close();
+            throw new IOException("Feuille introuvable : " + sheetName);
+        }
         Iterator<Row> it = sheet.iterator();
         List<String> heads = new ArrayList<>();
         if (it.hasNext()) {
@@ -55,6 +67,29 @@ public class XlsxRowReader implements RowReader {
         }
         this.headers = List.copyOf(heads);
         this.rowIterator = it;
+    }
+
+    /** Noms des feuilles du classeur (dans l'ordre), sans charger les lignes. */
+    public static List<String> sheetNames(Path path) throws IOException {
+        try (InputStream in = Files.newInputStream(path);
+             XSSFWorkbook wb = new XSSFWorkbook(in)) {
+            List<String> names = new ArrayList<>();
+            for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+                names.add(wb.getSheetName(i));
+            }
+            return names;
+        } catch (RuntimeException ex) {
+            throw new IOException("Fichier XLSX illisible ou corrompu.", ex);
+        }
+    }
+
+    private static Sheet findSheet(XSSFWorkbook wb, String name) {
+        for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+            if (wb.getSheetName(i).equalsIgnoreCase(name)) {
+                return wb.getSheetAt(i);
+            }
+        }
+        return null;
     }
 
     @Override
