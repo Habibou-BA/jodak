@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Plateforme JO",
-    "description": "Collection de tests de l'API REST de la plateforme JO. Organisée par domaine.",
+    "name": "Plateforme JO — API REST & SOAP",
+    "description": "Collection de test de la **Plateforme JO** (Jeux Olympiques).\n\n### API entièrement ouverte\nAucune authentification n'est requise : tous les endpoints REST et SOAP sont appelables directement (aucun 401/403).\n\n### Exécution complète (Collection Runner)\nLancez **Run collection** : les dossiers s'exécutent dans l'ordre et couvrent l'intégralité des fonctionnalités —\n1. **Disciplines** → 2. **Nations** → 3. **Athlètes** → 4. **Épreuves** → 5. **Résultats** (podium + médailles automatiques) → 6. **Tableau des médailles** → 7. **Tableau de bord** → 8. **SOAP** → 9. **Nettoyage**.\n\nChaque requête de création mémorise l'`id` retourné dans une variable de collection (`disciplineId`, `countryId`, `athleteId`…), réutilisée par les requêtes suivantes. Le dossier **Nettoyage** supprime tout à la fin : le scénario est **rejouable**.\n\n### Prérequis\nApplication démarrée sur `{{baseUrl}}` (par défaut `http://localhost:8080`) — `mvn spring-boot:run` ou `docker compose up --build`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -11,32 +11,47 @@
       "type": "string"
     },
     {
-      "key": "adminEmail",
-      "value": "admin@jodak.sn",
-      "type": "string"
-    },
-    {
-      "key": "adminPassword",
+      "key": "disciplineId",
       "value": "",
       "type": "string"
     },
     {
-      "key": "token",
+      "key": "countryId",
       "value": "",
       "type": "string"
     },
     {
-      "key": "refreshToken",
+      "key": "athleteId",
       "value": "",
       "type": "string"
     },
     {
-      "key": "importJobId",
-      "value": "1",
+      "key": "athleteId2",
+      "value": "",
       "type": "string"
     },
     {
-      "key": "backupFileName",
+      "key": "athleteId3",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "epreuveId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resultatId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resultatId2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resultatId3",
       "value": "",
       "type": "string"
     }
@@ -44,6 +59,7 @@
   "item": [
     {
       "name": "Disciplines",
+      "description": "CRUD des disciplines et consultation de leurs athlètes.",
       "item": [
         {
           "name": "Créer une discipline",
@@ -55,6 +71,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Escrime\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/disciplines",
               "host": [
@@ -66,12 +91,20 @@
                 "disciplines"
               ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Athlétisme\"\n}"
-            },
-            "description": "Crée une discipline. Réponses : 201 (créée), 400 (invalide), 409 (nom déjà utilisé)."
-          }
+            "description": "Crée une discipline. **201** si créée, **409** si le nom existe déjà, **400** si invalide. L'`id` renvoyé est mémorisé pour la suite du scénario."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Discipline créée (201)\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"disciplineId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Lister les disciplines (paginé)",
@@ -102,8 +135,20 @@
                   "value": "name,asc"
                 }
               ]
+            },
+            "description": "Liste paginée et triée. Réponse homogène : `content`, `page`, `size`, `totalElements`, `totalPages`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Liste OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
             }
-          }
+          ]
         },
         {
           "name": "Consulter une discipline",
@@ -111,7 +156,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/disciplines/1",
+              "raw": "{{baseUrl}}/api/v1/disciplines/{{disciplineId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -119,11 +164,22 @@
                 "api",
                 "v1",
                 "disciplines",
-                "1"
+                "{{disciplineId}}"
               ]
             },
-            "description": "Réponses : 200 (trouvée), 404 (introuvable)."
-          }
+            "description": "Détail d'une discipline par identifiant. **404** si inconnue."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Détail OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Modifier une discipline",
@@ -135,32 +191,17 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/disciplines/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "disciplines",
-                "1"
-              ]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Natation\"\n}"
+              "raw": "{\n  \"name\": \"Escrime\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "Réponses : 200 (modifiée), 400 (invalide), 404 (introuvable), 409 (conflit)."
-          }
-        },
-        {
-          "name": "Supprimer une discipline",
-          "request": {
-            "method": "DELETE",
-            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/disciplines/1",
+              "raw": "{{baseUrl}}/api/v1/disciplines/{{disciplineId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -168,11 +209,22 @@
                 "api",
                 "v1",
                 "disciplines",
-                "1"
+                "{{disciplineId}}"
               ]
             },
-            "description": "Réponses : 204 (supprimée), 404 (introuvable), 409 (référencée)."
-          }
+            "description": "Remplace le nom de la discipline. **200**, **404**, **409** (nom pris)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Modifiée (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Athlètes d'une discipline (paginé)",
@@ -180,7 +232,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/disciplines/1/athletes?page=0&size=20&sort=lastName,asc",
+              "raw": "{{baseUrl}}/api/v1/disciplines/{{disciplineId}}/athletes?page=0&size=20&sort=lastName,asc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -188,7 +240,7 @@
                 "api",
                 "v1",
                 "disciplines",
-                "1",
+                "{{disciplineId}}",
                 "athletes"
               ],
               "query": [
@@ -206,16 +258,28 @@
                 }
               ]
             },
-            "description": "Réponses : 200, 404 (discipline introuvable)."
-          }
+            "description": "Liste paginée des athlètes rattachés à la discipline."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Athlètes de la discipline OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
       "name": "Nations",
+      "description": "Référentiel des nations (code CIO). Utilisé comme nationalité des athlètes.",
       "item": [
         {
-          "name": "Ajouter une nation",
+          "name": "Créer une nation",
           "request": {
             "method": "POST",
             "header": [
@@ -224,6 +288,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"QAT\",\n  \"name\": \"Qatar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/countries",
               "host": [
@@ -235,12 +308,20 @@
                 "countries"
               ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"code\": \"AUT\",\n  \"name\": \"Autriche\"\n}"
-            },
-            "description": "Réponses : 201, 400 (invalide), 409 (code/nom déjà utilisé)."
-          }
+            "description": "Ajoute une nation (code 3 lettres, unique). **201**, **409** si déjà présente. `QAT` n'est pas dans le référentiel initial : créable à chaque run."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Nation créée ou déjà présente (201/409)\", () => pm.expect([201,409]).to.include(pm.response.code));",
+                  "if (pm.response.code===201) pm.collectionVariables.set(\"countryId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Lister les nations (paginé)",
@@ -271,8 +352,21 @@
                   "value": "name,asc"
                 }
               ]
+            },
+            "description": "Liste paginée des nations. Capture un `countryId` valide (référentiel initial) pour la suite du scénario."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Liste des nations OK (200)\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"countryId\", pm.response.json().content[0].id);"
+                ]
+              }
             }
-          }
+          ]
         },
         {
           "name": "Consulter une nation",
@@ -280,7 +374,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/countries/1",
+              "raw": "{{baseUrl}}/api/v1/countries/{{countryId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -288,18 +382,31 @@
                 "api",
                 "v1",
                 "countries",
-                "1"
+                "{{countryId}}"
               ]
+            },
+            "description": "Détail d'une nation par identifiant."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Détail nation OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
             }
-          }
+          ]
         }
       ]
     },
     {
       "name": "Athlètes",
+      "description": "CRUD complet (PUT + PATCH) et recherche multicritère paginée. Trois athlètes sont créés pour former un podium.",
       "item": [
         {
-          "name": "Créer un athlète",
+          "name": "Créer un athlète (or)",
           "request": {
             "method": "POST",
             "header": [
@@ -308,6 +415,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastName\": \"Al-Thani\",\n  \"firstName\": \"Karim\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"2009-03-15\",\n  \"countryId\": {{countryId}},\n  \"disciplineId\": {{disciplineId}},\n  \"heightCm\": 178,\n  \"weightKg\": 68\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/athletes",
               "host": [
@@ -319,20 +435,116 @@
                 "athletes"
               ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"lastName\": \"Bolt\",\n  \"firstName\": \"Usain\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"1986-08-21\",\n  \"countryId\": 1,\n  \"disciplineId\": 1,\n  \"heightCm\": 195,\n  \"weightKg\": 94\n}"
-            },
-            "description": "Réponses : 201, 400 (invalide), 404 (nationalité/discipline introuvable)."
-          }
+            "description": "Crée un athlète rattaché à la nation et la discipline créées. **201**, **400** (validation FR), **404** (nation/discipline inconnue)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Athlète 1 créé (201)\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"athleteId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Rechercher des athlètes (multicritère, paginé)",
+          "name": "Créer un athlète (argent)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastName\": \"Haddad\",\n  \"firstName\": \"Yara\",\n  \"gender\": \"FEMALE\",\n  \"birthDate\": \"2010-07-22\",\n  \"countryId\": {{countryId}},\n  \"disciplineId\": {{disciplineId}},\n  \"heightCm\": 165,\n  \"weightKg\": 55\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "athletes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Athlète 2 créé (201)\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"athleteId2\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Créer un athlète (bronze)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastName\": \"Nasser\",\n  \"firstName\": \"Omar\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"2008-11-30\",\n  \"countryId\": {{countryId}},\n  \"disciplineId\": {{disciplineId}},\n  \"heightCm\": 182,\n  \"weightKg\": 74\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "athletes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Athlète 3 créé (201)\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"athleteId3\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rechercher des athlètes (multicritère)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/athletes?gender=MALE&disciplineId=1&page=0&size=20&sort=lastName,asc",
+              "raw": "{{baseUrl}}/api/v1/athletes?disciplineId={{disciplineId}}&gender=MALE&page=0&size=20&sort=lastName,asc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -343,32 +555,12 @@
               ],
               "query": [
                 {
+                  "key": "disciplineId",
+                  "value": "{{disciplineId}}"
+                },
+                {
                   "key": "gender",
                   "value": "MALE"
-                },
-                {
-                  "key": "disciplineId",
-                  "value": "1"
-                },
-                {
-                  "key": "countryId",
-                  "value": "1",
-                  "disabled": true
-                },
-                {
-                  "key": "lastName",
-                  "value": "bol",
-                  "disabled": true
-                },
-                {
-                  "key": "birthDateFrom",
-                  "value": "1980-01-01",
-                  "disabled": true
-                },
-                {
-                  "key": "birthDateTo",
-                  "value": "2000-12-31",
-                  "disabled": true
                 },
                 {
                   "key": "page",
@@ -383,8 +575,20 @@
                   "value": "lastName,asc"
                 }
               ]
+            },
+            "description": "Recherche par `Specification` : critères combinables (nom, sexe, discipline, nation…), pagination et tri."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Recherche OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
             }
-          }
+          ]
         },
         {
           "name": "Consulter un athlète",
@@ -392,7 +596,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/athletes/1",
+              "raw": "{{baseUrl}}/api/v1/athletes/{{athleteId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -400,13 +604,24 @@
                 "api",
                 "v1",
                 "athletes",
-                "1"
+                "{{athleteId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Détail athlète OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Modifier un athlète (complet)",
+          "name": "Modifier un athlète (complet, PUT)",
           "request": {
             "method": "PUT",
             "header": [
@@ -415,8 +630,17 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastName\": \"Al-Thani\",\n  \"firstName\": \"Karim\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"2009-03-15\",\n  \"countryId\": {{countryId}},\n  \"disciplineId\": {{disciplineId}},\n  \"heightCm\": 178,\n  \"weightKg\": 70\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/athletes/1",
+              "raw": "{{baseUrl}}/api/v1/athletes/{{athleteId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -424,17 +648,25 @@
                 "api",
                 "v1",
                 "athletes",
-                "1"
+                "{{athleteId}}"
               ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"lastName\": \"Bolt\",\n  \"firstName\": \"Usain\",\n  \"gender\": \"MALE\",\n  \"birthDate\": \"1986-08-21\",\n  \"countryId\": 1,\n  \"disciplineId\": 1,\n  \"heightCm\": 195,\n  \"weightKg\": 96\n}"
+            "description": "Remplacement complet de l'athlète."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"PUT OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
             }
-          }
+          ]
         },
         {
-          "name": "Modifier un athlète (partiel)",
+          "name": "Modifier un athlète (partiel, PATCH)",
           "request": {
             "method": "PATCH",
             "header": [
@@ -443,31 +675,17 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/athletes/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "athletes",
-                "1"
-              ]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"weightKg\": 80\n}"
-            }
-          }
-        },
-        {
-          "name": "Supprimer un athlète",
-          "request": {
-            "method": "DELETE",
-            "header": [],
+              "raw": "{\n  \"weightKg\": 72\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/athletes/1",
+              "raw": "{{baseUrl}}/api/v1/athletes/{{athleteId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -475,15 +693,28 @@
                 "api",
                 "v1",
                 "athletes",
-                "1"
+                "{{athleteId}}"
               ]
+            },
+            "description": "Mise à jour partielle : seuls les champs fournis sont modifiés."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"PATCH OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
             }
-          }
+          ]
         }
       ]
     },
     {
       "name": "Épreuves",
+      "description": "CRUD des épreuves (rattachées à une discipline, datées) et consultation du podium.",
       "item": [
         {
           "name": "Créer une épreuve",
@@ -495,6 +726,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Fleuret individuel\",\n  \"disciplineId\": {{disciplineId}},\n  \"eventDate\": \"2026-11-05\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/epreuves",
               "host": [
@@ -506,20 +746,28 @@
                 "epreuves"
               ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"label\": \"100 m\",\n  \"disciplineId\": 1,\n  \"eventDate\": \"2024-08-04\"\n}"
-            },
-            "description": "Réponses : 201, 400 (invalide), 404 (discipline introuvable), 409 (déjà existante)."
-          }
+            "description": "Crée une épreuve dans la discipline. **201**, **409** (libellé+discipline+date déjà pris), **404** (discipline inconnue)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Épreuve créée (201)\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"epreuveId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Rechercher des épreuves (discipline, date, paginé)",
+          "name": "Rechercher des épreuves (discipline / date)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/epreuves?disciplineId=1&page=0&size=20&sort=eventDate,asc",
+              "raw": "{{baseUrl}}/api/v1/epreuves?disciplineId={{disciplineId}}&page=0&size=20&sort=eventDate,asc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -531,27 +779,7 @@
               "query": [
                 {
                   "key": "disciplineId",
-                  "value": "1"
-                },
-                {
-                  "key": "eventDate",
-                  "value": "2024-08-04",
-                  "disabled": true
-                },
-                {
-                  "key": "eventDateFrom",
-                  "value": "2024-08-01",
-                  "disabled": true
-                },
-                {
-                  "key": "eventDateTo",
-                  "value": "2024-08-31",
-                  "disabled": true
-                },
-                {
-                  "key": "label",
-                  "value": "100",
-                  "disabled": true
+                  "value": "{{disciplineId}}"
                 },
                 {
                   "key": "page",
@@ -567,7 +795,18 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Recherche épreuves OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Consulter une épreuve",
@@ -575,7 +814,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/epreuves/1",
+              "raw": "{{baseUrl}}/api/v1/epreuves/{{epreuveId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -583,10 +822,21 @@
                 "api",
                 "v1",
                 "epreuves",
-                "1"
+                "{{epreuveId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Détail épreuve OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Modifier une épreuve",
@@ -598,71 +848,48 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/epreuves/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "epreuves",
-                "1"
-              ]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"label\": \"200 m\",\n  \"disciplineId\": 1,\n  \"eventDate\": \"2024-08-06\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Supprimer une épreuve",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/epreuves/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "epreuves",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Podium d'une épreuve",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/epreuves/1/podium",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "epreuves",
-                "1",
-                "podium"
-              ]
+              "raw": "{\n  \"label\": \"Fleuret individuel\",\n  \"disciplineId\": {{disciplineId}},\n  \"eventDate\": \"2026-11-06\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "Médaillés (rangs 1 à 3) ordonnés. Réponses : 200, 404 (épreuve introuvable)."
-          }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/epreuves/{{epreuveId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "epreuves",
+                "{{epreuveId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Épreuve modifiée (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
       "name": "Résultats",
+      "description": "Enregistrement des résultats avec **attribution automatique des médailles** (rang 1/2/3 → or/argent/bronze) et consultation du podium.",
       "item": [
         {
-          "name": "Enregistrer un résultat",
+          "name": "Enregistrer un résultat (rang 1 → or)",
           "request": {
             "method": "POST",
             "header": [
@@ -671,6 +898,15 @@
                 "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"epreuveId\": {{epreuveId}},\n  \"athleteId\": {{athleteId}},\n  \"rank\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/resultats",
               "host": [
@@ -682,20 +918,148 @@
                 "resultats"
               ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"epreuveId\": 1,\n  \"athleteId\": 1,\n  \"rank\": 1\n}"
-            },
-            "description": "Médaille attribuée automatiquement. Réponses : 201, 400, 404, 409 (athlète/rang déjà pris), 422 (discipline incohérente)."
-          }
+            "description": "Enregistre un résultat ; la médaille est dérivée du rang. **201**, **409** (rang déjà pris ou athlète déjà classé dans l'épreuve)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Résultat 1 créé (201)\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"resultatId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Rechercher des résultats (paginé)",
+          "name": "Enregistrer un résultat (rang 2 → argent)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"epreuveId\": {{epreuveId}},\n  \"athleteId\": {{athleteId2}},\n  \"rank\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resultats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resultats"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Résultat 2 créé (201)\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"resultatId2\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Enregistrer un résultat (rang 3 → bronze)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"epreuveId\": {{epreuveId}},\n  \"athleteId\": {{athleteId3}},\n  \"rank\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resultats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resultats"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Résultat 3 créé (201)\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"resultatId3\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Podium de l'épreuve",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/resultats?epreuveId=1&page=0&size=20&sort=rankPosition,asc",
+              "raw": "{{baseUrl}}/api/v1/epreuves/{{epreuveId}}/podium",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "epreuves",
+                "{{epreuveId}}",
+                "podium"
+              ]
+            },
+            "description": "Podium (or/argent/bronze) de l'épreuve, une fois les résultats enregistrés."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Podium OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rechercher des résultats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resultats?epreuveId={{epreuveId}}&page=0&size=20&sort=rankPosition,asc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -707,17 +1071,7 @@
               "query": [
                 {
                   "key": "epreuveId",
-                  "value": "1"
-                },
-                {
-                  "key": "athleteId",
-                  "value": "1",
-                  "disabled": true
-                },
-                {
-                  "key": "medal",
-                  "value": "OR",
-                  "disabled": true
+                  "value": "{{epreuveId}}"
                 },
                 {
                   "key": "page",
@@ -733,7 +1087,18 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Recherche résultats OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Consulter un résultat",
@@ -741,7 +1106,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/resultats/1",
+              "raw": "{{baseUrl}}/api/v1/resultats/{{resultatId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -749,10 +1114,21 @@
                 "api",
                 "v1",
                 "resultats",
-                "1"
+                "{{resultatId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Détail résultat OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Corriger un résultat",
@@ -764,31 +1140,17 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/resultats/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "resultats",
-                "1"
-              ]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"epreuveId\": 1,\n  \"athleteId\": 1,\n  \"rank\": 2\n}"
-            }
-          }
-        },
-        {
-          "name": "Supprimer un résultat",
-          "request": {
-            "method": "DELETE",
-            "header": [],
+              "raw": "{\n  \"epreuveId\": {{epreuveId}},\n  \"athleteId\": {{athleteId}},\n  \"rank\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/resultats/1",
+              "raw": "{{baseUrl}}/api/v1/resultats/{{resultatId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -796,15 +1158,27 @@
                 "api",
                 "v1",
                 "resultats",
-                "1"
+                "{{resultatId}}"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Résultat corrigé (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
       "name": "Tableau des médailles",
+      "description": "Classement officiel des nations (or, puis argent, puis bronze).",
       "item": [
         {
           "name": "Tableau officiel des médailles",
@@ -822,13 +1196,25 @@
                 "tableau-medailles"
               ]
             },
-            "description": "Classement des nations : or, puis argent, puis bronze (départage alphabétique)."
-          }
+            "description": "Agrégation par nation : or, argent, bronze, total. Tri or → argent → bronze."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Tableau des médailles OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
       "name": "Tableau de bord",
+      "description": "Statistiques globales et classement par points (Or=7, Argent=4, Bronze=1).",
       "item": [
         {
           "name": "Synthèse statistique",
@@ -846,8 +1232,19 @@
                 "tableau-de-bord"
               ]
             },
-            "description": "Compteurs globaux + classement par points (Or=7, Argent=4, Bronze=1)."
-          }
+            "description": "Totaux (athlètes, pays, disciplines, épreuves, médailles) et médaillés par pays."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Dashboard OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Classement par points",
@@ -865,13 +1262,26 @@
                 "tableau-de-bord",
                 "classement-points"
               ]
+            },
+            "description": "Classement des nations par points (Or=7, Argent=4, Bronze=1)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Classement points OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
             }
-          }
+          ]
         }
       ]
     },
     {
-      "name": "SOAP",
+      "name": "SOAP (SI historique)",
+      "description": "Web Service SOAP en lecture seule (Spring WS). Endpoint `POST /ws`, contrat `GET /ws/olympics.wsdl`.",
       "item": [
         {
           "name": "WSDL",
@@ -888,8 +1298,19 @@
                 "olympics.wsdl"
               ]
             },
-            "description": "Contrat WSDL généré à partir du XSD."
-          }
+            "description": "Contrat WSDL du service."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"WSDL OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GetMedalTable (SOAP)",
@@ -901,6 +1322,15 @@
                 "value": "text/xml"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ol=\"http://jodak.com/olympics/soap\">\n  <soapenv:Body>\n    <ol:GetMedalTableRequest/>\n  </soapenv:Body>\n</soapenv:Envelope>",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/ws",
               "host": [
@@ -910,11 +1340,19 @@
                 "ws"
               ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ol=\"http://jodak.com/olympics/soap\">\n  <soapenv:Body>\n    <ol:GetMedalTableRequest/>\n  </soapenv:Body>\n</soapenv:Envelope>"
+            "description": "Tableau des médailles via SOAP."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"SOAP GetMedalTable OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
             }
-          }
+          ]
         },
         {
           "name": "GetAthlete (SOAP)",
@@ -926,6 +1364,15 @@
                 "value": "text/xml"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ol=\"http://jodak.com/olympics/soap\">\n  <soapenv:Body>\n    <ol:GetAthleteRequest>\n      <ol:id>{{athleteId}}</ol:id>\n    </ol:GetAthleteRequest>\n  </soapenv:Body>\n</soapenv:Envelope>",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/ws",
               "host": [
@@ -935,482 +1382,267 @@
                 "ws"
               ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ol=\"http://jodak.com/olympics/soap\">\n  <soapenv:Body>\n    <ol:GetAthleteRequest>\n      <ol:id>1</ol:id>\n    </ol:GetAthleteRequest>\n  </soapenv:Body>\n</soapenv:Envelope>"
+            "description": "Consultation d'un athlète via SOAP (utilise l'athlète créé plus haut)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"SOAP GetAthlete OK (200)\", () => pm.response.to.have.status(200));"
+                ]
+              }
             }
-          }
+          ]
         }
       ]
     },
     {
-      "name": "Administration",
-      "description": "Module d'administration sécurisé (JWT). Commencez par **Authentification › Connexion** : le jeton est stocké dans `token` et réutilisé automatiquement (auth Bearer au niveau de la collection). Renseignez `adminEmail` / `adminPassword` dans les variables de la collection.",
+      "name": "Nettoyage (idempotence)",
+      "description": "Supprime les données créées, dans l'ordre des clés étrangères, afin que le scénario puisse être relancé proprement. Exerce aussi les endpoints DELETE.",
       "item": [
         {
-          "name": "Authentification",
-          "item": [
-            {
-              "name": "Connexion (obtenir un jeton)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/auth/login",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "auth",
-                    "login"
-                  ]
-                },
-                "description": "Authentifie un administrateur et renvoie un couple de jetons JWT. Le script de test stocke `accessToken` dans la variable `token` (réutilisée par toutes les requêtes protégées). Réponses : 200, 401 (identifiants invalides), 423 (compte verrouillé après 5 échecs).",
-                "auth": {
-                  "type": "noauth"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "pm.test(\"Connexion réussie (200)\", () => pm.response.to.have.status(200));",
-                      "const j = pm.response.json();",
-                      "if (j.accessToken) pm.collectionVariables.set(\"token\", j.accessToken);",
-                      "if (j.refreshToken) pm.collectionVariables.set(\"refreshToken\", j.refreshToken);"
-                    ]
-                  }
-                }
+          "name": "Supprimer résultat (or)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resultats/{{resultatId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resultats",
+                "{{resultatId}}"
               ]
-            },
+            }
+          },
+          "event": [
             {
-              "name": "Rafraîchir le jeton",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/auth/refresh",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "auth",
-                    "refresh"
-                  ]
-                },
-                "description": "Échange un refresh token valide contre un nouveau couple de jetons (rotation). Réponses : 200, 401 (jeton invalide/expiré/révoqué).",
-                "auth": {
-                  "type": "noauth"
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "pm.test(\"Connexion réussie (200)\", () => pm.response.to.have.status(200));",
-                      "const j = pm.response.json();",
-                      "if (j.accessToken) pm.collectionVariables.set(\"token\", j.accessToken);",
-                      "if (j.refreshToken) pm.collectionVariables.set(\"refreshToken\", j.refreshToken);"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Déconnexion (révoquer le refresh)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/auth/logout",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "auth",
-                    "logout"
-                  ]
-                },
-                "description": "Révoque le refresh token courant. Réponses : 204.",
-                "auth": {
-                  "type": "noauth"
-                }
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Supprimé (204)\", () => pm.response.to.have.status(204));"
+                ]
               }
             }
           ]
         },
         {
-          "name": "Imports",
-          "item": [
-            {
-              "name": "Lancer l'initialisation du système (XLSX)",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "formdata",
-                  "formdata": [
-                    {
-                      "key": "file",
-                      "type": "file",
-                      "src": [],
-                      "description": "Le classeur d'initialisation .xlsx (sample-imports/initialisation-systeme.xlsx)"
-                    },
-                    {
-                      "key": "mode",
-                      "value": "COMMIT",
-                      "type": "text",
-                      "description": "COMMIT (import réel) | DRY_RUN (simulation)"
-                    },
-                    {
-                      "key": "duplicateStrategy",
-                      "value": "SKIP",
-                      "type": "text",
-                      "description": "SKIP | UPDATE | REJECT"
-                    }
-                  ]
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/imports",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "imports"
-                  ]
-                },
-                "description": "Charge le **fichier d'initialisation du système** (classeur XLSX multi-feuilles : Nations, Disciplines, Epreuves, Athletes, Resultats) en une seule opération asynchrone. C'est le seul format d'import pris en charge. Le job id renvoyé est stocké dans `importJobId`. Réponses : 201, 400 (fichier non .xlsx / invalide), 409 (import identique déjà en cours)."
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const j = pm.response.json();",
-                      "if (j && j.id) pm.collectionVariables.set(\"importJobId\", j.id);"
-                    ]
-                  }
-                }
+          "name": "Supprimer résultat (argent)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resultats/{{resultatId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resultats",
+                "{{resultatId2}}"
               ]
-            },
-            {
-              "name": "Lister les imports (paginé)",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/imports?status=&page=0&size=20",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "imports"
-                  ],
-                  "query": [
-                    {
-                      "key": "status",
-                      "value": ""
-                    },
-                    {
-                      "key": "page",
-                      "value": "0"
-                    },
-                    {
-                      "key": "size",
-                      "value": "20"
-                    }
-                  ]
-                },
-                "description": "Liste les jobs d'import, filtrable par `status` (PENDING/RUNNING/COMPLETED/FAILED/CANCELLED)."
-              }
-            },
-            {
-              "name": "Consulter un import (progression)",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/imports/{{importJobId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "imports",
-                    "{{importJobId}}"
-                  ]
-                },
-                "description": "État et compteurs d'un job (status, progressPercent, importedRows, failedRows). À interroger périodiquement jusqu'à un état terminal."
-              }
-            },
-            {
-              "name": "Erreurs d'un import (paginé)",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/imports/{{importJobId}}/errors?page=0&size=20",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "imports",
-                    "{{importJobId}}",
-                    "errors"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "0"
-                    },
-                    {
-                      "key": "size",
-                      "value": "20"
-                    }
-                  ]
-                },
-                "description": "Rapport ligne par ligne des rejets (numéro de ligne, colonne, motif)."
-              }
-            },
-            {
-              "name": "Annuler un import",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/imports/{{importJobId}}/cancel",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "imports",
-                    "{{importJobId}}",
-                    "cancel"
-                  ]
-                },
-                "description": "Demande l'annulation coopérative d'un job en cours. Réponses : 204."
-              }
-            },
-            {
-              "name": "Compenser un import (rollback)",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/imports/{{importJobId}}/rollback",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "imports",
-                    "{{importJobId}}",
-                    "rollback"
-                  ]
-                },
-                "description": "Supprime les enregistrements insérés par un import COMMIT terminé (compensation). Réponses : 200."
-              }
             }
-          ],
-          "description": "Initialisation du système via un unique classeur XLSX (import « système »). Lancez l'import, puis suivez sa progression / ses erreurs, annulez ou compensez si besoin."
-        },
-        {
-          "name": "Maintenance",
-          "item": [
+          },
+          "event": [
             {
-              "name": "Exporter les données (ZIP)",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/export",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "export"
-                  ]
-                },
-                "description": "Télécharge une archive ZIP (CSV par domaine + metadata.json avec empreintes SHA-256). Réponses : 200 (application/zip)."
-              }
-            },
-            {
-              "name": "Créer une sauvegarde",
-              "request": {
-                "method": "POST",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/backup",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "backup"
-                  ]
-                },
-                "description": "Crée une sauvegarde logique côté serveur ; le nom de fichier renvoyé est stocké dans `backupFileName`. Réponses : 200."
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const j = pm.response.json();",
-                      "if (j && j.fileName) pm.collectionVariables.set(\"backupFileName\", j.fileName);"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Télécharger une sauvegarde",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/backup/{{backupFileName}}/download",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "backup",
-                    "{{backupFileName}}",
-                    "download"
-                  ]
-                },
-                "description": "Télécharge une sauvegarde existante. Réponses : 200, 404 (introuvable)."
-              }
-            },
-            {
-              "name": "Réinitialiser les données",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"password\": \"{{adminPassword}}\",\n  \"confirmationPhrase\": \"REINITIALISER-DAKAR-2026\"\n}"
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/reset",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "reset"
-                  ]
-                },
-                "description": "⚠️ Opération destructive (double confirmation : mot de passe + phrase). **Désactivée par défaut** (`ADMIN_RESET_ENABLED=false`). Une sauvegarde est créée avant purge. Réponses : 200, 400 (phrase erronée), 401 (mot de passe erroné), 422 (fonction désactivée)."
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Supprimé (204)\", () => pm.response.to.have.status(204));"
+                ]
               }
             }
           ]
         },
         {
-          "name": "Journal",
-          "item": [
+          "name": "Supprimer résultat (bronze)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resultats/{{resultatId3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resultats",
+                "{{resultatId3}}"
+              ]
+            }
+          },
+          "event": [
             {
-              "name": "Lister le journal d'administration (paginé)",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/api/admin/logs?page=0&size=50",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "admin",
-                    "logs"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "0"
-                    },
-                    {
-                      "key": "size",
-                      "value": "50"
-                    }
-                  ]
-                },
-                "description": "Journal d'audit des actions d'administration (connexion, import, export, sauvegarde, réinitialisation)."
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Supprimé (204)\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supprimer athlète 1",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes/{{athleteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "athletes",
+                "{{athleteId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Supprimé (204)\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supprimer athlète 2",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes/{{athleteId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "athletes",
+                "{{athleteId2}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Supprimé (204)\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supprimer athlète 3",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/athletes/{{athleteId3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "athletes",
+                "{{athleteId3}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Supprimé (204)\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supprimer l'épreuve",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/epreuves/{{epreuveId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "epreuves",
+                "{{epreuveId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Supprimé (204)\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supprimer la discipline",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/disciplines/{{disciplineId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "disciplines",
+                "{{disciplineId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Supprimé (204)\", () => pm.response.to.have.status(204));"
+                ]
               }
             }
           ]
         }
       ]
     }
-  ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{token}}",
-        "type": "string"
-      }
-    ]
-  }
+  ]
 }

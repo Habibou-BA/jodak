@@ -17,10 +17,6 @@ spring:
   mvc:
     problemdetails:
       enabled: true             # erreurs au format ProblemDetail (RFC 7807)
-  servlet:
-    multipart:
-      max-file-size: ${IMPORT_MAX_FILE_SIZE:25MB}
-      max-request-size: ${IMPORT_MAX_REQUEST_SIZE:30MB}
 
 server:
   port: 8080
@@ -44,34 +40,3 @@ management:
     health:
       probes:
         enabled: true
-
-# Sécurité JWT (le secret DOIT être surchargé en production via JWT_SECRET).
-jwt:
-  secret: ${JWT_SECRET:dev-secret-a-remplacer-en-production-0123456789-abcdefghijklmnopqrstuvwxyz}
-  issuer: ${JWT_ISSUER:jodak}
-  access-ttl: ${JWT_ACCESS_TTL:PT15M}
-  refresh-ttl: ${JWT_REFRESH_TTL:P7D}
-
-# Création automatique du premier administrateur (premier démarrage uniquement).
-admin:
-  bootstrap:
-    email: ${ADMIN_EMAIL:}
-    password: ${ADMIN_PASSWORD:}
-  # Réinitialisation de la plateforme (désactivée par défaut, notamment en production).
-  reset:
-    enabled: ${ADMIN_RESET_ENABLED:false}
-    confirmation-phrase: ${ADMIN_RESET_CONFIRMATION_PHRASE:REINITIALISER-DAKAR-2026}
-
-# Import asynchrone de données.
-import:
-  storage-dir: ${IMPORT_STORAGE_DIR:${java.io.tmpdir}/jodak-imports}
-  chunk-size: ${IMPORT_CHUNK_SIZE:500}
-  max-concurrent-jobs: ${IMPORT_MAX_CONCURRENT_JOBS:2}
-  # Durcissement des fichiers importés.
-  max-file-size-bytes: ${IMPORT_MAX_FILE_SIZE_BYTES:26214400}          # 25 Mio (fichier téléversé)
-  max-uncompressed-bytes: ${IMPORT_MAX_UNCOMPRESSED_BYTES:209715200}   # 200 Mio (anti « zip bomb » XLSX)
-  min-inflate-ratio: ${IMPORT_MIN_INFLATE_RATIO:0.01}                   # rejette un ratio de décompression > 100x
-
-# Sauvegarde logique (export ZIP).
-backup:
-  storage-dir: ${BACKUP_STORAGE_DIR:${java.io.tmpdir}/jodak-backups}
