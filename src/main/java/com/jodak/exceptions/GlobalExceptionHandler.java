@@ -13,7 +13,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -29,11 +28,11 @@ import java.util.Map;
  * <p>La classe étend {@link ResponseEntityExceptionHandler} afin d'intercepter proprement les
  * exceptions techniques de Spring MVC (validation du corps, corps illisible, …).</p>
  *
- * <p>Restreint aux {@link RestController} : les vues web (contrôleurs {@code @Controller})
- * conservent la gestion d'erreurs HTML de Spring (page {@code error.html}).</p>
+ * <p>L'application n'expose que des API (REST et SOAP) : toutes les erreurs des contrôleurs
+ * remontent ici sous forme de {@code ProblemDetail}.</p>
  */
 @Slf4j
-@RestControllerAdvice(annotations = RestController.class)
+@RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // ---- Exceptions métier -------------------------------------------------
