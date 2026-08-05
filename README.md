@@ -105,9 +105,14 @@ Docker / Docker Compose · JUnit 5 · Mockito · Testcontainers · JAXB.
 
 ## Prérequis
 
-- **JDK 21** (build/run local). Via SDKMAN : `sdk install java 21-tem`
+- **JDK 21** (build/run local). Via SDKMAN : `sdk install java 21-tem` — sous Windows :
+  `winget install EclipseAdoptium.Temurin.21.JDK`
 - **Maven 3.9+**
 - **Docker** et **Docker Compose**
+
+> **Windows** : Docker Desktop avec le backend **WSL 2**, en mode **conteneurs Linux** (le mode
+> conteneurs Windows ne sait pas construire cette image). Les commandes ci-dessous sont identiques
+> dans PowerShell. Les ports **8080** et **5432** doivent être libres.
 
 ## Lancement
 

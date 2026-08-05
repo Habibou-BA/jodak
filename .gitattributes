@@ -1,0 +1,11 @@
+# Fins de ligne normalisées en LF, dans le dépôt comme dans la copie de travail.
+# Garantit un comportement identique sous Windows (où Git convertit en CRLF par
+# défaut) pour le Dockerfile, les migrations Flyway et les fichiers YAML.
+* text=auto eol=lf
+
+# Binaires : jamais convertis.
+*.png  binary
+*.jpg  binary
+*.pdf  binary
+*.jar  binary
+*.ico  binary
