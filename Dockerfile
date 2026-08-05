@@ -1,14 +1,18 @@
+# syntax=docker/dockerfile:1
+
 # --- Étape 1 : build (Java 21 + Maven) ---
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Cache des dépendances : on copie d'abord le pom
 COPY pom.xml .
-RUN mvn -q -B dependency:go-offline
-
-# Compilation et packaging (génère aussi les classes JAXB du SOAP)
 COPY src ./src
-RUN mvn -q -B clean package -DskipTests
+
+# Le dépôt Maven est monté en cache BuildKit : il est réutilisé d'un build à
+# l'autre sans jamais alourdir l'image. `maven.test.skip` évite de compiler les
+# tests (et donc de télécharger Testcontainers) : `mvn verify` s'en charge.
+# Compile aussi les classes JAXB du SOAP.
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -ntp -Dmaven.test.skip=true package
 
 # --- Étape 2 : runtime (JRE 21 Alpine, utilisateur non-root) ---
 FROM eclipse-temurin:21-jre-alpine
