@@ -75,7 +75,8 @@ dans _Settings → Secrets and variables → Actions_.
 | `SPRING_DATASOURCE_USERNAME` | Variable              | Utilisateur de la base            |
 | `SPRING_DATASOURCE_PASSWORD` | **Secret**            | Mot de passe de la base           |
 
-> Les valeurs par défaut (docker-compose) sont dans [`.env.example`](.env.example).
+> En local, `docker compose` applique ses propres valeurs par défaut (base, utilisateur et mot de
+> passe : `olympics`) : aucune configuration n'est requise.
 
 ---
 

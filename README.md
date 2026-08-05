@@ -148,8 +148,9 @@ de quoi obtenir immédiatement un tableau des médailles peuplé.
 | `prod` | Variables d'environnement | `db/migration` | Production / Docker |
 
 L'application **ne requiert aucune authentification** et n'a besoin d'aucun secret. Les seules
-variables utiles (facultatives) concernent la base de données ; elles sont documentées dans
-[`.env.example`](.env.example) et lues par `docker-compose`.
+variables utiles (facultatives) concernent la base de données ; `docker-compose` les lit depuis
+l'environnement et applique à défaut les valeurs ci-dessous — aucune configuration n'est nécessaire
+pour démarrer.
 
 | Variable | Rôle | Défaut |
 |---|---|---|
